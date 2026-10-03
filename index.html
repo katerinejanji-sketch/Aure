@@ -216,6 +216,7 @@ tr.click:hover td{background:var(--sunk)}
 
 <script>
 /* Si algo falla al abrir, mostrarlo en pantalla en vez de quedarse en "Cargando…" */
+window.addEventListener('unhandledrejection',function(e){try{var g=document.getElementById('gate');if(g&&!g.hidden&&/Cargando/.test(g.textContent)){g.innerHTML='<div class="gate-card"><h2>No se pudo abrir la app</h2><p class="hint" style="margin:0">'+String((e.reason&&e.reason.message)||e.reason||'Error desconocido').replace(/</g,'&lt;')+'</p><p class="hint" style="margin:0">Toma una captura de esta pantalla y envíala.</p></div>'}}catch(_){}});
 window.addEventListener('error',function(e){try{var g=document.getElementById('gate');if(g&&!g.hidden&&/Cargando/.test(g.textContent)){g.innerHTML='<div class="gate-card"><h2>No se pudo abrir la app</h2><p class="hint" style="margin:0">'+String(e.message||e.error||'Error desconocido').replace(/</g,'&lt;')+'</p><p class="hint" style="margin:0">Toma una captura de esta pantalla y envíala.</p></div>'}}catch(_){}});
 </script>
 <script>
@@ -1065,7 +1066,7 @@ function checkGate(){
   if(!S.loaded)return;
   if(!S.acc){if(!UNLOCKED)showGate('crear');return}
   if(UNLOCKED&&ssGet()!==S.acc.hash){lockApp();return}
-  if(!UNLOCKED){if(ssGet()===S.acc.hash)unlock();else if(document.getElementById('gate').hidden)showGate('entrar')}
+  if(!UNLOCKED){if(ssGet()===S.acc.hash)unlock();else if(!document.querySelector('#gate form[data-gate="entrar"]'))showGate('entrar')}
 }
 
 /* ============ Arranque ============ */
