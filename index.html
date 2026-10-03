@@ -195,7 +195,7 @@ tr.click:hover td{background:var(--sunk)}
       <div class="tag">Control de compras y ventas · Oro 18K</div>
     </div>
     <div class="right">
-      <div class="rate" id="rateChip" role="button" tabindex="0" title="Actualizar precio del oro"></div>
+      <div class="rate" id="rateChip" role="button" tabindex="0" title="Actualizar precios por gramo"></div>
       <button class="btn-ghost lockbtn" data-act="lock" id="lockBtn" hidden>Bloquear</button>
     </div>
   </header>
@@ -204,7 +204,7 @@ tr.click:hover td{background:var(--sunk)}
     <button data-tab="inventario">Inventario</button>
     <button data-tab="clientes">Clientes</button>
     <button data-tab="ventas">Ventas y cobros</button>
-    <button data-tab="tarifa">Precio del oro y ajustes</button>
+    <button data-tab="tarifa">Costo y ajustes</button>
   </nav>
   <div id="banner"></div>
   <main id="view"></main>
@@ -256,11 +256,15 @@ function addPeriod(s,freq,k){const d=pd(s);
 const ym=s=>String(s||'').slice(0,7);
 
 /* precios: todo sale del precio del oro por gramo
-   costo de reposición = peso × oro/g + hechura · contado = costo × (1+margen) · crédito = contado × (1+recargo) */
-const costoRef=a=>r2((+a.peso||0)*(+T().oro||0)+(+a.hechura||0));
+   costo = peso × costo/g · contado = costo × (1 + % contado) · crédito = costo × (1 + % crédito)
+   Un solo porcentaje por modalidad, siempre sobre el costo (si no se ha guardado, 30 % y 50 %) */
+function PG(){const t=T();const c=+t.oro||0;const def=t.mContado===undefined;
+  const mc=def?30:+t.mContado, mr=def?50:+t.mCredito;
+  return {c,mc,mr,co:c*(1+mc/100),cr:c*(1+mr/100),directo:!def}}
+const costoRef=a=>r2((+a.peso||0)*PG().c);
 const costoArt=a=>(+a.costoReal>0)?r2(a.costoReal):costoRef(a);
-const pContado=a=>r2(costoRef(a)*(1+(+T().margen||0)/100));
-const pCredito=a=>r2(pContado(a)*(1+(+T().recargo||0)/100));
+const pContado=a=>{const g=PG();return r2((+a.peso||0)*g.c*(1+g.mc/100))};
+const pCredito=a=>{const g=PG();return r2((+a.peso||0)*g.c*(1+g.mr/100))};
 
 /* plan de cuotas */
 function plan(v){
@@ -324,9 +328,10 @@ async function putTarifa(t){
 function render(){
   const t=T();
   paintLogo();
-  document.getElementById('rateChip').innerHTML=S.tarifa&&t.oro>0
-    ? `<span class="muted">Oro 18K</span><span><b class="num">${money(t.oro)}/g</b></span><span>Margen <b class="num">${pct(t.margen)}</b></span><span>Crédito <b class="num">+${pct(t.recargo)}</b></span>${t.tasa>0?`<span>Tasa <b class="num">Bs. ${fmt(t.tasa)}</b></span>`:''}<span class="muted num">${fdate(t.fecha)}</span>`
-    : `<span><b>Fija el precio del oro por gramo</b> para calcular precios</span>`;
+  const pg=PG();
+  document.getElementById('rateChip').innerHTML=S.tarifa&&pg.co>0
+    ? `<span class="muted">Costo/g</span><span><b class="num">${money(pg.c)}</b></span><span>Contado <b class="num">+${pct(pg.mc)}</b></span><span>Crédito <b class="num">+${pct(pg.mr)}</b></span>${t.tasa>0?`<span>Tasa <b class="num">Bs. ${fmt(t.tasa)}</b></span>`:''}<span class="muted num">${fdate(t.fecha)}</span>`
+    : `<span><b>Fija los precios por gramo</b> para calcular precios</span>`;
   document.getElementById('lockBtn').hidden=!S.acc;
   document.querySelectorAll('#tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===TAB));
   const bn=[];
@@ -360,7 +365,7 @@ function vResumen(){
   return `
   <div class="head"><div><div class="eyebrow">Resumen general</div><h2>Así está el negocio hoy</h2></div>
     <div class="tools"><button class="btn-gold" data-act="new-art">+ Registrar compra</button><button data-act="new-venta">+ Nueva venta</button></div></div>
-  ${bajo.length?`<div class="banner" style="background:var(--bad-bg);color:var(--bad);margin:0 0 16px">${bajo.length} ${bajo.length===1?'pieza tiene':'piezas tienen'} precio de contado por debajo de su costo real (faltan ${money(gap)} en total). Sube el precio del oro por gramo o el margen en <b>Precio del oro y ajustes</b>.</div>`:''}
+  ${bajo.length?`<div class="banner" style="background:var(--bad-bg);color:var(--bad);margin:0 0 16px">${bajo.length} ${bajo.length===1?'pieza tiene':'piezas tienen'} precio de contado por debajo de su costo real (faltan ${money(gap)} en total). Sube el costo por gramo o el % de contado en <b>Costo y ajustes</b>.</div>`:''}
   <div class="kpis">
     <div class="kpi"><div class="l">Inventario disponible</div><div class="v">${disp.length} piezas</div><div class="s num">${grams(g)} de oro 18K</div></div>
     <div class="kpi"><div class="l">Inversión en inventario</div><div class="v">${money(vc)}</div><div class="s num">Contado ${money(vco)} · Crédito ${money(vcr)}</div></div>
@@ -404,8 +409,8 @@ function vInventario(){
   </div>
   ${arts.length?`<div class="panel scroll"><table><thead><tr><th>Código</th><th>Pieza</th><th class="r">Peso</th><th class="r">Costo</th><th class="r">Contado</th><th class="r">Crédito</th><th>Estado</th></tr></thead>
   <tbody>${rows}</tbody>${disp.length?`<tfoot><tr><td colspan="2">${disp.length} disponibles</td><td class="r">${grams(sum(disp.map(a=>a.peso)))}</td><td class="r">${money(sum(disp.map(costoArt)))}</td><td class="r">${money(sum(disp.map(pContado)))}</td><td class="r">${money(sum(disp.map(pCredito)))}</td><td></td></tr></tfoot>`:''}</table></div>
-  <p class="hint">Precio de contado = (peso × oro/g + hechura) × (1 + margen). Crédito = contado + recargo. Se recalculan al cambiar el precio del oro; al vender, el precio queda fijado en la venta.</p>`
-  :`<div class="panel empty"><h3>${Object.keys(S.art).length?'Ninguna pieza coincide':'Aún no hay compras registradas'}</h3><p>Registra cada pieza con su peso y su hechura. El costo, el precio de contado y el de crédito se calculan solos con el precio del oro.</p><button class="btn-gold" data-act="new-art">+ Registrar la primera compra</button></div>`}`;
+  <p class="hint">Contado = peso × costo/g × (1 + % contado). Crédito = peso × costo/g × (1 + % crédito). Se recalculan al cambiar los precios por gramo; al vender, el precio queda fijado en la venta.</p>`
+  :`<div class="panel empty"><h3>${Object.keys(S.art).length?'Ninguna pieza coincide':'Aún no hay compras registradas'}</h3><p>Registra cada pieza con su peso. El costo, el precio de contado y el de crédito se calculan solos con los precios por gramo.</p><button class="btn-gold" data-act="new-art">+ Registrar la primera compra</button></div>`}`;
 }
 
 function vClientes(){
@@ -451,17 +456,18 @@ function vTarifa(){
   const t=T(), h=(t.historial||[]).slice().reverse();
   const disp=Object.values(S.art).filter(a=>a.estado!=='vendido');
   return `
-  <div class="head"><div><div class="eyebrow">Un solo registro para todo el inventario</div><h2>Precio del oro</h2></div></div>
+  <div class="head"><div><div class="eyebrow">Un solo registro para todo el inventario</div><h2>Costo y porcentajes</h2></div></div>
   <div class="tarifa-box">
     <form class="panel" data-form="tarifa">
       <div class="grid g2">
-        <label class="f">Precio oro 18K por gramo (USD) <input id="tOro" name="oro" type="number" step="0.01" min="0.01" inputmode="decimal" value="${t.oro||''}" required></label>
-        <label class="f">Fecha de actualización <input id="tFecha" name="fecha" type="date" value="${today()}"></label>
-        <label class="f">Margen comercial (%) <small>Sobre costo de oro + hechura</small><input id="tMargen" name="margen" type="number" step="0.1" min="0" inputmode="decimal" value="${t.margen??35}" required></label>
-        <label class="f">Recargo por crédito (%) <small>Sobre el precio de contado</small><input id="tRecargo" name="recargo" type="number" step="0.1" min="0" inputmode="decimal" value="${t.recargo??0}" required></label>
+        <label class="f">Costo por gramo (USD) <small>Lo que te cuesta el gramo</small><input id="tOro" name="oro" type="number" step="0.01" min="0.01" inputmode="decimal" value="${PG().c||''}" required></label>
+        <label class="f">Fecha de actualización <small>&nbsp;</small><input id="tFecha" name="fecha" type="date" value="${today()}"></label>
+        <label class="f">% de ganancia de contado <small>Sobre el costo</small><input id="tContado" name="mContado" type="number" step="0.1" min="0" inputmode="decimal" value="${PG().mc}" required></label>
+        <label class="f">% de ganancia a crédito <small>Sobre el costo</small><input id="tCredito" name="mCredito" type="number" step="0.1" min="0" inputmode="decimal" value="${PG().mr}" required></label>
         <label class="f" style="grid-column:1/-1">Tasa del día (Bs. por USD) <small>Para mostrar equivalentes en bolívares</small><input id="tTasa" name="tasa" type="number" step="0.0001" min="0" inputmode="decimal" value="${t.tasa||''}"></label>
       </div>
-      ${!(+t.recargo>0)?'<p class="warnline">El recargo por crédito está en 0 %: hoy el precio a crédito es igual al de contado.</p>':''}
+      ${S.tarifa&&!PG().directo?'<p class="warnline">Se aplicaron 30 % de contado y 50 % a crédito. Revisa el costo por gramo y pulsa Guardar.</p>':''}
+      <div id="tEj" class="hint"></div>
       <div class="conv">
         <div class="eyebrow" style="color:var(--muted)">Calcular desde la cotización internacional</div>
         <div class="row">
@@ -469,17 +475,17 @@ function vTarifa(){
           <label class="f">Prima local o descuento (%) <input id="cPrima" type="number" step="0.1" inputmode="decimal" value="0"></label>
         </div>
         <div id="cRes" class="hint">Escribe el precio de la onza para ver el gramo 24K y el gramo 18K (75 % de pureza).</div>
-        <div class="tools"><button type="button" class="btn-sm" data-act="usar-conv" id="cUsar" disabled>Usar como precio 18K</button></div>
+        <div class="tools"><button type="button" class="btn-sm" data-act="usar-conv" id="cUsar" disabled>Usar como costo por gramo</button></div>
         <div class="links"><a href="https://www.kitco.com/charts/gold" target="_blank" rel="noopener">Cotización oro · Kitco</a><a href="https://www.lbma.org.uk/prices-and-data/precious-metal-prices" target="_blank" rel="noopener">Precio oficial LBMA</a><a href="https://www.bcv.org.ve/" target="_blank" rel="noopener">Tasa oficial · BCV</a></div>
       </div>
       <div class="ratecard" id="tPrev"></div>
       <p class="hint">Al guardar, los precios de las ${disp.length} piezas disponibles (${grams(sum(disp.map(a=>a.peso)))}) se recalculan. Las ventas ya hechas conservan el precio pactado.</p>
-      <div style="display:flex;justify-content:flex-end"><button class="btn-gold" type="submit">Guardar precio del oro</button></div>
+      <div style="display:flex;justify-content:flex-end"><button class="btn-gold" type="submit">Guardar precios</button></div>
     </form>
     <div class="panel"><h3 style="font-size:20px;margin-bottom:10px">Historial de precios</h3>
-      ${h.length?`<div class="scroll"><table class="mini"><thead><tr><th>Fecha</th><th class="r">Oro/g</th><th class="r">Margen</th><th class="r">Crédito</th><th class="r">Tasa</th></tr></thead><tbody>
-      ${h.map(x=>`<tr><td class="num">${fdate(x.fecha)}</td><td class="r">$ ${fmt(x.oro)}</td><td class="r">${pct(x.margen)}</td><td class="r">+${pct(x.recargo)}</td><td class="r">${x.tasa?fmt(x.tasa):'—'}</td></tr>`).join('')}</tbody></table></div>`
-      :'<p class="hint">Cada vez que guardes el precio del oro queda registrado aquí con su fecha.</p>'}
+      ${h.length?`<div class="scroll"><table class="mini"><thead><tr><th>Fecha</th><th class="r">Costo/g</th><th class="r">Contado</th><th class="r">Crédito</th><th class="r">Tasa</th></tr></thead><tbody>
+      ${h.map(x=>`<tr><td class="num">${fdate(x.fecha)}</td><td class="r">$ ${fmt(x.oro)}</td><td class="r">${x.mContado!==undefined?'+'+pct(x.mContado):'—'}</td><td class="r">${x.mCredito!==undefined?'+'+pct(x.mCredito):'—'}</td><td class="r">${x.tasa?fmt(x.tasa):'—'}</td></tr>`).join('')}</tbody></table></div>`
+      :'<p class="hint">Cada vez que guardes los precios queda registrado aquí con su fecha.</p>'}
       <div style="margin-top:22px;padding-top:16px;border-top:1px solid var(--line)">
         <h3 style="font-size:20px;margin-bottom:6px">Logo</h3>
         <p class="hint">Sube el logo en PNG (fondo transparente) o JPG. Se usa en la cabecera, la pantalla de acceso y los estados de cuenta.</p>
@@ -503,9 +509,12 @@ function vTarifa(){
 }
 function tarifaPreview(){
   const box=document.getElementById('tPrev');if(!box)return;
-  const oro=+document.getElementById('tOro').value||0,m=+document.getElementById('tMargen').value||0,rc=+document.getElementById('tRecargo').value||0,tasa=+document.getElementById('tTasa').value||0;
-  const disp=Object.values(S.art).filter(a=>a.estado!=='vendido');
-  const cost=sum(disp.map(a=>(+a.peso||0)*oro+(+a.hechura||0))), co=r2(cost*(1+m/100)), cr=r2(co*(1+rc/100));
+  const oro=+document.getElementById('tOro').value||0,mc=+document.getElementById('tContado').value||0,mr=+document.getElementById('tCredito').value||0,tasa=+document.getElementById('tTasa').value||0;
+  const cg=oro*(1+mc/100),rg=oro*(1+mr/100);
+  const disp=Object.values(S.art).filter(a=>a.estado!=='vendido');const g=sum(disp.map(a=>a.peso));
+  const cost=sum(disp.map(costoArt)), co=r2(g*cg), cr=r2(g*rg);
+  const ej=document.getElementById('tEj');
+  if(ej)ej.innerHTML=oro&&cg&&rg?`Por gramo: contado <b>${money(cg)}</b> · crédito <b>${money(rg)}</b>.<br>Ejemplo, prenda de 1,3 g: costo ${money(1.3*oro)} · contado ${money(1.3*cg)} (+${pct(mc)}) · crédito ${money(1.3*rg)} (+${pct(mr)}).`:'';
   const b=n=>tasa>0?`<div class="hint">Bs. ${fmt(n*tasa)}</div>`:'';
   box.innerHTML=`<div><div class="eyebrow">Costo inventario</div><div class="v">${money(cost)}</div>${b(cost)}</div>
   <div><div class="eyebrow">Valor contado</div><div class="v">${money(co)}</div>${b(co)}</div>
@@ -570,15 +579,15 @@ function formArt(id){
       <label class="f">Código <input id="aCod" value="${esc(id?a.codigo:codeArt(a.tipo))}" readonly title="Se asigna automáticamente"></label>
       <label class="f" style="grid-column:1/-1">Acabado / cierre <input id="aAcab" name="acabado" maxlength="100" placeholder="Ej. Oro Amarillo 18K & Circonia fina" value="${esc(a.acabado)}"></label>
       <label class="f">Peso en gramos <input id="aPeso" name="peso" type="number" step="0.01" min="0.01" inputmode="decimal" required value="${a.peso}" ${sold?'readonly':''}></label>
-      <label class="f">Hechura / merma (USD) <input id="aHech" name="hechura" type="number" step="0.01" min="0" inputmode="decimal" value="${a.hechura??''}" ${sold?'readonly':''}></label>
+      <input type="hidden" id="aHech" name="hechura" value="${a.hechura??''}">
       <label class="f">Proveedor <input id="aProv" name="proveedor" maxlength="80" value="${esc(a.proveedor)}"></label>
       <label class="f">Fecha de compra <input id="aFecha" name="fechaCompra" type="date" value="${a.fechaCompra||today()}"></label>
       <label class="f" style="grid-column:1/-1">Lote / factura <small>Agrupa las piezas de una misma compra para ajustarlas al monto pagado</small><input id="aLote" name="lote" maxlength="80" list="lotesList" value="${esc(a.lote)}"><datalist id="lotesList">${[...new Set(Object.values(S.art).map(x=>x.lote).filter(Boolean))].map(l=>`<option value="${esc(l)}">`).join('')}</datalist></label>
-      <label class="f" style="grid-column:1/-1">Costo real pagado (USD) <small>Opcional, para calcular tu utilidad real. Si lo dejas vacío se usa peso × oro/g + hechura.</small><input id="aCostoReal" name="costoReal" type="number" step="0.01" min="0" inputmode="decimal" value="${+a.costoReal>0?a.costoReal:''}"></label>
+      <label class="f" style="grid-column:1/-1">Costo real pagado (USD) <small>Opcional, para calcular tu utilidad real. Si lo dejas vacío se usa peso × costo por gramo.</small><input id="aCostoReal" name="costoReal" type="number" step="0.01" min="0" inputmode="decimal" value="${+a.costoReal>0?a.costoReal:''}"></label>
       <label class="f" style="grid-column:1/-1">Notas <textarea id="aNotas" name="notas" maxlength="400">${esc(a.notas)}</textarea></label>
     </div>
     <div class="preview" id="aPrev"></div>
-    ${!S.tarifa?'<p class="hint">Aún no hay precio del oro. Fíjalo en la pestaña Precio del oro para ver los precios.</p>':''}
+    ${!S.tarifa?'<p class="hint">Aún no hay precios por gramo. Fíjalos en la pestaña Costo y ajustes.</p>':''}
   </div>
   <div class="mf">${id&&!sold?`<button type="button" class="btn-danger btn-ghost" data-act="del-art" data-id="${id}">Eliminar pieza</button>`:''}<span style="flex:1"></span>
     <button type="button" data-act="close">Cancelar</button><button class="btn-gold" type="submit">${id?'Guardar cambios':'Registrar compra'}</button></div></form>`);
@@ -610,7 +619,7 @@ let VF=null; // estado del formulario de venta
 function formVenta(clienteId){
   const disp=Object.values(S.art).filter(a=>a.estado!=='vendido').sort((a,b)=>(a.codigo||'').localeCompare(b.codigo||''));
   const cs=Object.values(S.cli).sort((a,b)=>(a.nombre||'').localeCompare(b.nombre||''));
-  if(!S.tarifa){toast('Primero fija el precio del oro.');TAB='tarifa';render();return}
+  if(!S.tarifa){toast('Primero fija los precios por gramo.');TAB='tarifa';render();return}
   if(!disp.length){toast('No hay piezas disponibles. Registra una compra primero.');return}
   VF={sel:new Set(),modalidad:'credito',totalManual:false,q:''};
   openModal(`<form data-form="venta">${mh('Nueva venta','Ventas')}
@@ -712,7 +721,7 @@ function formFactura(){
   const lotes=[...new Set(disp.map(a=>a.lote).filter(Boolean))];
   openModal(`<form data-form="factura">${mh('Ajustar inversión a factura','Inventario')}
   <div class="mb">
-    <p class="hint" style="margin:0">Reparte el monto realmente pagado entre las piezas, en proporción a su costo de referencia (peso × oro/g + hechura). Así la inversión y la utilidad reflejan lo que se pagó. Los precios de venta no cambian.</p>
+    <p class="hint" style="margin:0">Reparte el monto realmente pagado entre las piezas, en proporción a su peso (peso × costo por gramo). Así la inversión y la utilidad reflejan lo que se pagó. Los precios de venta no cambian.</p>
     <div class="grid g2">
       <label class="f" style="grid-column:1/-1">Piezas <select id="fLote"><option value="">Todas las piezas disponibles (${disp.length})</option>${lotes.map(l=>`<option ${lotes.length===1?'selected':''} value="${esc(l)}">${esc(l)} (${disp.filter(a=>a.lote===l).length})</option>`).join('')}</select></label>
       <label class="f">Monto pagado según factura (USD) <input id="fMonto" name="monto" type="number" step="0.01" min="0.01" inputmode="decimal" required></label>
@@ -729,7 +738,7 @@ function facturaPreview(){
   let h=`<div class="sumbar"><span>${sel.length} piezas</span><span>${grams(sum(sel.map(a=>a.peso)))}</span><span>Costo de referencia <b>${money(base)}</b></span><span>Inversión actual <b>${money(actual)}</b></span><span>Valor contado <b>${money(co)}</b></span></div>`;
   if(monto>0&&base>0){const d=(monto/base-1)*100;
     h+=`<p style="margin:10px 0 0">Con ${money(monto)}: <b>${d<0?'descuento de '+pct(-d):'recargo de '+pct(d)}</b> sobre el costo de referencia.</p>`;
-    if(co<monto)h+=`<p class="warnline" style="color:var(--bad);margin-top:6px">Ojo: vendiendo todo de contado al precio actual entrarían ${money(co)}, ${money(monto-co)} menos de lo pagado. Conviene subir el precio del oro por gramo o el margen.</p>`}
+    if(co<monto)h+=`<p class="warnline" style="color:var(--bad);margin-top:6px">Ojo: vendiendo todo de contado al precio actual entrarían ${money(co)}, ${money(monto-co)} menos de lo pagado. Conviene subir el costo por gramo o el % de contado.</p>`}
   box.innerHTML=h;
 }
 
@@ -892,7 +901,7 @@ document.addEventListener('click',async e=>{
   if(a==='v-mod'){VF.modalidad=t.dataset.m;VF.totalManual=false;document.querySelectorAll('[data-act=v-mod]').forEach(b=>b.setAttribute('aria-pressed',b===t));ventaRecalc();return}
   if(a==='csv')return csv();
   if(a==='lock')return lockApp();
-  if(a==='usar-conv'){const i=document.getElementById('tOro');i.value=t.dataset.v;tarifaPreview();toast('Precio 18K cargado. Revisa y pulsa Guardar.');return}
+  if(a==='usar-conv'){const i=document.getElementById('tOro');i.value=t.dataset.v;tarifaPreview();toast('Costo por gramo cargado. Revisa y pulsa Guardar.');return}
   if(a==='logo-reset'){if(!armed(t,'¿Volver al original?'))return;await putConfig('marca',{logo:''});toast('Logo original restaurado.');return}
   if(a==='foto')return verFoto(id);
   if(a==='foto-quitar'){if(AF){AF.thumb='';AF.full=null;AF.changed=true;fotoPaint()}return}
@@ -919,7 +928,7 @@ document.addEventListener('input',e=>{
   if(id==='cliQ'){UI.cliQ=e.target.value;const pos=e.target.selectionStart;render();const i=document.getElementById('cliQ');i.focus();i.setSelectionRange(pos,pos);return}
   if(['aPeso','aCostoReal','aHech'].includes(id))return artPreview();
   if(id==='fMonto')return facturaPreview();
-  if(['tOro','tMargen','tRecargo','tTasa'].includes(id))return tarifaPreview();
+  if(['tOro','tContado','tCredito','tTasa'].includes(id))return tarifaPreview();
   if(['cOnza','cPrima'].includes(id))return convPreview();
   if(id==='abMonto'){const o=document.getElementById('abBs');if(o)o.textContent=bs(e.target.value);return}
   if(id==='vQ'){const q=e.target.value.toLowerCase();document.querySelectorAll('#vPick .pick').forEach(p=>p.hidden=q&&!p.dataset.q.includes(q));return}
@@ -946,16 +955,16 @@ document.addEventListener('submit',async e=>{
   const f=e.target.closest('form[data-form]');if(!f)return;e.preventDefault();
   const fd=Object.fromEntries(new FormData(f).entries()),kind=f.dataset.form,id=f.dataset.id;
   if(kind==='tarifa'){
-    const t={oro:r2(fd.oro),margen:Math.round((+fd.margen||0)*10)/10,recargo:Math.round((+fd.recargo||0)*10)/10,tasa:Math.round((+fd.tasa||0)*10000)/10000,fecha:fd.fecha||today()};
-    if(!(t.oro>0)){toast('Indica el precio del oro por gramo.');return}
-    if(t.margen<0||t.recargo<0){toast('El margen y el recargo no pueden ser negativos.');return}
+    const t={oro:r2(fd.oro),mContado:Math.round((+fd.mContado||0)*10)/10,mCredito:Math.round((+fd.mCredito||0)*10)/10,tasa:Math.round((+fd.tasa||0)*10000)/10000,fecha:fd.fecha||today()};
+    if(!(t.oro>0)){toast('Indica el costo por gramo.');return}
+    if(t.mContado<0||t.mCredito<0){toast('Los porcentajes no pueden ser negativos.');return}
     const h=[...(T().historial||[]),{...t}].slice(-60);
-    if(await putTarifa({...t,historial:h}))toast('Precio del oro guardado. Inventario recalculado.');return}
+    if(await putTarifa({...t,historial:h}))toast('Precios guardados. Inventario recalculado.');return}
   if(kind==='factura'){
     const sel=facturaSel(),monto=r2(fd.monto);
     if(!sel.length){toast('No hay piezas disponibles en esa selección.');return}
     if(!(monto>0)){toast('Indica el monto pagado según la factura.');return}
-    const base=sum(sel.map(costoRef));if(!(base>0)){toast('Primero fija el precio del oro.');return}
+    const base=sum(sel.map(costoRef));if(!(base>0)){toast('Primero fija los precios por gramo.');return}
     const k=monto/base;let acc=0;
     const nuevos=sel.map((x,i)=>{let c=i<sel.length-1?r2(costoRef(x)*k):r2(monto-acc);acc=r2(acc+c);return {...x,costoReal:c,ajusteFactura:{monto,fecha:fd.fecha||today(),factor:Math.round(k*1e6)/1e6}}});
     closeModal();toast(`Aplicando ajuste a ${sel.length} piezas…`);
@@ -994,7 +1003,7 @@ document.addEventListener('submit',async e=>{
     const v={id:uid(),numero:nextCode('V-','ven','numero'),clienteId:fd.clienteId,fecha:fd.fecha||today(),modalidad:VF.modalidad,
       items:items.map(a=>({id:a.id,codigo:a.codigo,descripcion:a.descripcion,peso:a.peso,precio:credito?pCredito(a):pContado(a),costo:costoArt(a)})),
       subtotal:sub,total,inicial,cuotas:credito?Math.max(1,parseInt(fd.cuotas)||1):0,frecuencia:credito?fd.frecuencia:'',
-      tarifa:{oro:T().oro,margen:T().margen,recargo:T().recargo,tasa:T().tasa||0},costoTotal:sum(items.map(costoArt)),abonos:[],notas:(fd.notas||'').trim(),creado:new Date().toISOString()};
+      tarifa:{costoG:PG().c,mContado:PG().mc,mCredito:PG().mr,tasa:T().tasa||0},costoTotal:sum(items.map(costoArt)),abonos:[],notas:(fd.notas||'').trim(),creado:new Date().toISOString()};
     const cid=v.clienteId;VF=null;
     if(!await put('ven',v))return;
     for(const a of items)await put('art',{...a,estado:'vendido',ventaId:v.id});
