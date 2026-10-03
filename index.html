@@ -1,0 +1,1070 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#16100C">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="AURE">
+<title>AURE · Control de Oro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gilda+Display&family=Manrope:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: libro de joyería — barra de marca arriba, pestañas como separadores de archivo, contenido en hojas claras sobre fondo arena */
+:root{
+  --bg:#F5F1EB; --surface:#FFFDF9; --sunk:#EFE8DE; --ink:#2A201A; --muted:#76665A; --line:#E3D8CA;
+  --gold:#9C772E; --gold-mark:#B58D3D; --sand:#C4B19C; --butano:#5C4233; --on-gold:#FFFDF9;
+  --ok:#3C7350; --ok-bg:#E3EFE6; --warn:#9A6516; --warn-bg:#F6EAD5; --bad:#9E3B33; --bad-bg:#F5E1DE;
+  --f-display:"Gilda Display","Didot","Bodoni 72",Georgia,serif;
+  --f-body:"Manrope","Avenir Next","Segoe UI",system-ui,sans-serif;
+  --r:6px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#16100C; --surface:#201812; --sunk:#2A2019; --ink:#F1E7DB; --muted:#B4A290; --line:#3A2D23;
+  --gold:#D4AC5E; --gold-mark:#C9A04E; --sand:#8C7A66; --butano:#E2CDB6; --on-gold:#1A120D;
+  --ok:#8BC69C; --ok-bg:#1E3125; --warn:#E3B062; --warn-bg:#3A2A12; --bad:#EE958B; --bad-bg:#3D1F1B; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#16100C; --surface:#201812; --sunk:#2A2019; --ink:#F1E7DB; --muted:#B4A290; --line:#3A2D23;
+  --gold:#D4AC5E; --gold-mark:#C9A04E; --sand:#8C7A66; --butano:#E2CDB6; --on-gold:#1A120D;
+  --ok:#8BC69C; --ok-bg:#1E3125; --warn:#E3B062; --warn-bg:#3A2A12; --bad:#EE958B; --bad-bg:#3D1F1B; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14.5px;line-height:1.5;padding-inline:16px;padding-block:0 48px}
+.wrap{max-width:1180px;margin:0 auto}
+h1,h2,h3{font-family:var(--f-display);font-weight:400;margin:0;text-wrap:balance;letter-spacing:.01em}
+.eyebrow{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);font-weight:700}
+.muted{color:var(--muted)}
+.num{font-variant-numeric:tabular-nums}
+/* header */
+.brand{display:flex;align-items:center;gap:14px;padding-block:22px 14px;flex-wrap:wrap}
+.brand svg{width:54px;height:46px;flex:none}
+.brand .wm{font-family:var(--f-display);font-size:28px;letter-spacing:.42em;line-height:1}
+.brand .tag{font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--muted);margin-top:6px}
+.brand .right{margin-left:auto;min-width:0;max-width:100%;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.rate{display:flex;flex-wrap:wrap;row-gap:4px;max-width:100%;gap:14px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:8px 12px;font-size:12.5px;cursor:pointer}
+.rate b{font-weight:700}
+.rate span{white-space:nowrap}
+nav.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none}
+nav.tabs button{background:none;border:0;border-bottom:2px solid transparent;padding:12px 16px;font:600 12px var(--f-body);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);cursor:pointer;white-space:nowrap}
+nav.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--gold-mark)}
+.banner{margin-top:14px;padding:10px 14px;border-radius:var(--r);background:var(--warn-bg);color:var(--warn);font-size:13px}
+main{padding-top:22px}
+.head{display:flex;align-items:end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.head h2{font-size:30px}
+.tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+/* controls */
+button,.btn{font:600 13px var(--f-body);border-radius:var(--r);padding:9px 14px;cursor:pointer;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.btn-gold{background:var(--gold);border-color:var(--gold);color:var(--on-gold)}
+.btn-ghost{background:transparent}
+.btn-sm{padding:6px 10px;font-size:12px}
+.btn-danger[data-armed]{background:var(--bad);border-color:var(--bad);color:var(--surface)}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--gold-mark);outline-offset:2px}
+button:disabled{opacity:.5;cursor:not-allowed}
+input,select,textarea{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:9px 11px;width:100%;min-width:0}
+textarea{min-height:64px;resize:vertical}
+label.f{display:flex;flex-direction:column;gap:5px;font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);min-width:0}
+label.f small{text-transform:none;letter-spacing:0;font-weight:500}
+.grid{display:grid;gap:12px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media (max-width:720px){.g3,.g4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:460px){.g2,.g3{grid-template-columns:minmax(0,1fr)}}
+/* KPIs */
+.kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+@media (max-width:820px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kpis.k3{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media (max-width:600px){.kpis.k3{grid-template-columns:minmax(0,1fr)}}
+.kpi{background:var(--surface);padding:16px 18px;min-width:0}
+.kpi .l{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.kpi .v{font-family:var(--f-display);font-size:27px;margin-top:6px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.kpi .s{font-size:12.5px;color:var(--muted);margin-top:2px}
+.kpi.alert .v{color:var(--bad)}
+.section{margin-top:28px}
+.section h3{font-size:21px;margin-bottom:10px}
+/* panels & tables */
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+.scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:700;text-align:left;padding:11px 12px;border-bottom:1px solid var(--line);white-space:nowrap;background:var(--sunk)}
+td{padding:11px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+td.r,th.r{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+tfoot td{font-weight:700;background:var(--sunk)}
+tr.click{cursor:pointer}
+tr.click:hover td{background:var(--sunk)}
+.code{white-space:nowrap;font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--gold)}
+.chip{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.06em;padding:3px 9px;border-radius:99px;white-space:nowrap}
+.c-ok{background:var(--ok-bg);color:var(--ok)}
+.c-warn{background:var(--warn-bg);color:var(--warn)}
+.c-bad{background:var(--bad-bg);color:var(--bad)}
+.c-n{background:var(--sunk);color:var(--muted)}
+.empty{padding:34px 20px;text-align:center;color:var(--muted)}
+.empty h3{color:var(--ink);font-size:20px;margin-bottom:6px}
+.empty p{max-width:52ch;margin:0 auto 14px}
+/* client cards */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.ccard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;cursor:pointer;display:flex;flex-direction:column;gap:10px;text-align:left;font:inherit;color:inherit}
+.ccard:hover{border-color:var(--sand)}
+.ccard .n{font-family:var(--f-display);font-size:19px}
+.ccard .row{display:flex;justify-content:space-between;gap:8px;font-size:13px}
+/* tarifa */
+.tarifa-box{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:18px}
+@media (max-width:820px){.tarifa-box{grid-template-columns:minmax(0,1fr)}}
+.tarifa-box .panel{padding:20px}
+.ratecard{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--line);border-radius:var(--r);overflow:hidden;border:1px solid var(--line);margin-top:14px}
+.ratecard div{background:var(--sunk);padding:12px}
+.ratecard .eyebrow{letter-spacing:.1em}
+.ratecard .v{font-family:var(--f-display);font-size:22px;font-variant-numeric:tabular-nums}
+/* modal */
+.ov{position:fixed;inset:0;background:rgba(20,12,8,.55);display:flex;align-items:flex-start;justify-content:center;padding:max(24px,env(safe-area-inset-top,0px)) 12px 24px;overflow-y:auto;z-index:20}
+.modal{background:var(--surface);border-radius:10px;width:100%;max-width:680px;border:1px solid var(--line);box-shadow:0 24px 60px rgba(0,0,0,.28)}
+.modal.wide{max-width:900px}
+.mh{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:20px 22px 14px;border-bottom:1px solid var(--line)}
+.mh h3{font-size:24px}
+.mb{padding:18px 22px;display:flex;flex-direction:column;gap:14px}
+.mf{display:flex;justify-content:flex-end;gap:8px;padding:14px 22px 20px;flex-wrap:wrap}
+.xbtn{border:0;background:none;font-size:22px;line-height:1;padding:4px 8px;color:var(--muted)}
+.preview{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;background:var(--sunk);border-radius:var(--r);padding:12px}
+.preview .l{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.preview .v{font-family:var(--f-display);font-size:19px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.picklist{max-height:260px;overflow-y:auto;border:1px solid var(--line);border-radius:var(--r)}
+.pick{display:flex;align-items:center;gap:10px;padding:9px 12px;border-bottom:1px solid var(--line);cursor:pointer;font-size:13.5px}
+.pick:last-child{border-bottom:0}
+.pick input{width:auto;flex:none}
+.th{width:44px;height:44px;border-radius:5px;object-fit:cover;flex:none;background:var(--sunk);border:1px solid var(--line);display:block;cursor:zoom-in}
+.th-ph{width:44px;height:44px;border-radius:5px;flex:none;background:var(--sunk);border:1px dashed var(--line);display:grid;place-items:center;color:var(--sand);font-family:var(--f-display);font-size:18px}
+.th.sm,.th-ph.sm{width:32px;height:32px;font-size:14px}
+.pz{display:flex;gap:10px;align-items:center;min-width:0}
+.pz>div{min-width:0}
+.photo-field{display:grid;grid-template-columns:150px minmax(0,1fr);gap:14px;align-items:center}
+@media (max-width:460px){.photo-field{grid-template-columns:minmax(0,1fr)}}
+.ph{aspect-ratio:1;max-width:100%;border-radius:var(--r);border:1px dashed var(--sand);background:var(--sunk);display:grid;place-items:center;overflow:hidden;color:var(--muted);font-size:12px;text-align:center;padding:0}
+.ph img{width:100%;height:100%;object-fit:cover;display:block}
+.lightbox{display:flex;justify-content:center;background:var(--sunk);border-radius:var(--r);min-height:200px;align-items:center}
+.lightbox img{max-width:100%;max-height:70vh;border-radius:var(--r);display:block}
+.pick .d{flex:1;min-width:0}
+.pick .p{white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:600}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.seg button{border:0;border-radius:0;background:var(--surface);color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--gold);color:var(--on-gold)}
+.sumbar{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;padding:10px 12px;background:var(--sunk);border-radius:var(--r)}
+.sumbar b{font-variant-numeric:tabular-nums}
+.venta{border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.venta .vh{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center;padding:12px 14px;background:var(--sunk)}
+.venta .vb{padding:12px 14px;display:flex;flex-direction:column;gap:12px}
+.mini{font-size:12.5px}
+.mini td,.mini th{padding:7px 9px}
+.brand .logo-img{height:52px;width:auto;max-width:150px;object-fit:contain;flex:none;display:block}
+.lockbtn{padding:8px 12px;font-size:12px}
+#gate{position:fixed;inset:0;z-index:50;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px 16px;overflow-y:auto}
+.gate-card{width:100%;max-width:380px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:30px 26px;display:flex;flex-direction:column;gap:14px;text-align:center}
+.gate-card .mark{display:flex;justify-content:center}
+.gate-card .mark svg{width:84px;height:70px}
+.gate-card .mark img{max-height:90px;max-width:220px;object-fit:contain}
+.gate-card h2{font-size:24px}
+.gate-card input{text-align:center;font-size:18px;letter-spacing:.3em}
+.gate-err{color:var(--bad);font-size:13px;min-height:1.2em;margin:0}
+.conv{background:var(--sunk);border-radius:var(--r);padding:14px;display:flex;flex-direction:column;gap:10px;margin-top:14px}
+.conv .row{display:flex;gap:10px;align-items:end;flex-wrap:wrap}
+.conv .row>*{flex:1 1 150px;min-width:0}
+.links{display:flex;gap:14px;flex-wrap:wrap;font-size:13px}
+.links a{color:var(--gold);font-weight:600}
+.warnline{color:var(--warn);font-size:12.5px;margin:0}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:var(--r);font-size:13px;z-index:40;max-width:calc(100% - 32px)}
+.hint{font-size:12.5px;color:var(--muted)}
+.foot{margin-top:40px;padding-top:14px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+@media (prefers-reduced-motion:no-preference){.modal{animation:up .18s ease-out}@keyframes up{from{transform:translateY(8px);opacity:.6}}}
+</style>
+</head>
+<body>
+
+<div class="wrap" hidden>
+  <header class="brand">
+    <span id="logoSlot" style="display:contents"><svg id="logoDefault" viewBox="0 0 120 100" aria-hidden="true" fill="none" stroke="var(--gold-mark)" stroke-width="2.6" stroke-linecap="round">
+      <path d="M33 95 L55 6 L82 95"/>
+      <path d="M3 62 Q48 49 117 45"/>
+      <path d="M78 22 V72 M54 46 H102 M63 31 L93 61 M93 31 L63 61" stroke-width="1.8"/>
+      <circle cx="78" cy="46" r="3.6" fill="var(--gold-mark)" stroke="none"/>
+    </svg></span>
+    <div>
+      <div class="wm">AURE</div>
+      <div class="tag">Control de compras y ventas · Oro 18K</div>
+    </div>
+    <div class="right">
+      <div class="rate" id="rateChip" role="button" tabindex="0" title="Actualizar precio del oro"></div>
+      <button class="btn-ghost lockbtn" data-act="lock" id="lockBtn" hidden>Bloquear</button>
+    </div>
+  </header>
+  <nav class="tabs" id="tabs" role="tablist">
+    <button data-tab="resumen">Resumen</button>
+    <button data-tab="inventario">Inventario</button>
+    <button data-tab="clientes">Clientes</button>
+    <button data-tab="ventas">Ventas y cobros</button>
+    <button data-tab="tarifa">Precio del oro y ajustes</button>
+  </nav>
+  <div id="banner"></div>
+  <main id="view"></main>
+  <footer class="foot"><span>AURE · Joyería fina &amp; sentido</span><span>Luz que se lleva puesta</span></footer>
+</div>
+<div id="gate" hidden></div>
+<div id="modalRoot"></div>
+<div id="toastRoot"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
+<script>
+/* Catálogo inicial (53 piezas del Excel, con la inversión ajustada a la factura pagada) — se carga solo la primera vez */
+const SEED={"tarifa":{"oro":78.5,"margen":35,"recargo":0,"tasa":42.5,"fecha":"2026-10-02","historial":[{"oro":78.5,"margen":35,"recargo":0,"tasa":42.5,"fecha":"2026-10-02"}]},"art":{"AUR-CAD-001":{"id":"AUR-CAD-001","codigo":"AUR-CAD-001","descripcion":"Gargantilla Punto de Luz Bisel","tipo":"Cadenas","acabado":"Oro Amarillo 18K & Circonia fina","peso":1.2,"hechura":22.0,"proveedor":"","fechaCompra":"","costoReal":186.08,"notas":"","estado":"disponible","ventaId":null,"creado":"2026-10-03T02:12:52.509269Z","actualizado":"2026-10-03T02:12:52.509269Z","origen":"Catalogo_AURE_Cotizador_53_Piezas","lote":"Factura inicial (53 piezas)","ajusteFactura":{"monto":14867.16,"fecha":"2026-10-02","factor":1.601418}},"AUR-CAD-002":{"id":"AUR-CAD-002","codigo":"AUR-CAD-002","descripcion":"Collar Paperclip Lazo en Y","tipo":"Cadenas","acabado":"Oro Amarillo 18K | Diseño contemporáneo","peso":3.8,"hechura":35.0,"proveedor":"","fechaCompra":"","costoReal":533.75,"notas":"","estado":"disponible","ventaId":null,"creado":"2026-10-03T02:12:52.509269Z","actualizado":"2026-10-03T02:12:52.509269Z","origen":"Catalogo_AURE_Cotizador_53_Piezas","lote":"Factura inicial (53 piezas)","ajusteFactura":{"monto":14867.16,"fecha":"2026-10-02","factor":1.601418}},"AUR-CAD-003":{"id":"AUR-CAD-003","codigo":"AUR-CAD-003","descripcion":"Cadena Bolitas Tricolor","tipo":"Cadenas","acabado":"Oro Amarillo, Blanco y Rosa","peso":4.8,"hechura":28.0,"proveedor":"","fechaCompra":"","costoReal":648.25,"notas":"","estado":"disponible","ventaId":null,"creado":"2026-10-03T02:12:52.509269Z","actualizado":"2026-10-03T02:12:52.509269Z","origen":"Catalogo_AURE_Cotizador_53_Piezas","lote":"Factura inicial (53 piezas)","ajusteFactura":{"monto":14867.16,"fecha":"2026-10-02","factor":1.601418}},"AUR-CAD-004":{"id":"AUR-CAD-004","codigo":"AUR-CAD-004","descripcion":"Collar Cascada Triple Hilo","tipo":"Cadenas","acabado":"Oro Amarillo, Blanco y Rosa 18K","peso":7.3,"hechura":42.0,"proveedor":"","fechaCompra":"","costoReal":984.95,"notas":"","estado":"disponible","ventaId":null,"creado":"2026-10-03T02:12:52.509269Z","actualizado":"2026-10-03T02:12:52.509269Z","origen":"Catalogo_AURE_Cotizador_53_Piezas","lote":"Factura inicial (53 piezas)","ajusteFactura":{"monto":14867.16,"fecha":"2026-10-02","factor":1.601418}},"AUR-CAD-005":{"id":"AUR-CAD-005","codigo":"AUR-CAD-005","descripcion":"Gargantilla Punto de Luz Blanco","tipo":"Cadenas","acabado":"Oro Blanco 18K & Circonia brillante","peso":1.2,"hechura":22.0,"proveedor":"","fechaCompra":"","costoReal":186.08,"notas":"","estado":"disponible","ventaId":null,"creado":"2026-10-03T02:12:52.509269Z","actualizado":"2026-10-03T02:12:52.509269Z","origen":"Catalogo_AURE_Cotizador_53_Piezas","lote":"Factura inicial (53 piezas)","ajusteFactura":{"monto":14867.16,"fecha":"2026-10-02","factor":1.601418}},"AUR-CAD-006":{"id":"AUR-CAD-006","codigo":"AUR-CAD-006","descripcion":"Gargantilla Corazón Calado","tipo":"Cadenas","acabado":"Oro Amarillo 18K | Cadena espejo","peso":1.3,"hechura":24.0,"proveedor":"","fechaCompra":"","costoReal":201.86,"notas":"","estado":"disponible","ventaId":null,"creado":"2026-10-03T02:12:52.509269Z","actualizado":"2026-10-03T02:12:52.509269Z","origen":"Catalogo_AURE_Cotizador_53_Piezas","lote":"Factura inicial (53 piezas)","ajusteFactura":{"monto":14867.16,"fecha":"2026-10-02","factor":1.601418}},"AUR-CAD-007":{"id":"AUR-CAD-007","codigo":"AUR-CAD-007","descripcion":"Cadena Fina Clásica Veneciana","tipo":"Cadenas","acabado":"Oro Amarillo 18K | Pulido brillante","peso":1.3,"hechura":18.0,"proveedor":"","fechaCompra":"","costoReal":192.25,"notas":"","estado":"disponible","ventaId":null,"creado":"2026-10-03T02:12:52.509269Z","actualizado":"2026-10-03T02:12:52.509269Z","origen":"Catalogo_AURE_Cotizador_53_Piezas","lote":"Factura inicial (53 piezas)","ajusteFactura":{"monto":14867.16,"fecha":"2026-10-02","factor":1.601418}},"AUR-CAD-008":{"id":"AUR-CAD-008","codigo":"AUR-CAD-008","descripcion":"Gargantilla Trébol Cuatro Hojas","tipo":"Cadenas","acabado":"Oro Amarillo 18K | Símbolo de fortuna","peso":1.8,"hechura":25.0,"proveedor":"","fechaCompra":"","costoReal":266.32,"notas":"","estado":"disponible","ventaId":null,"creado":"2026-10-03T02:12:52.509269Z","actualizado":"2026-10-03T02:12:52.509269Z","origen":"Catalogo_AURE_Cotizador_53_Piezas","lote":"Factura inicial (53 piezas)","ajusteFactura":{"monto":14867.16,"fecha":"2026-10-02","factor":1.601418}},"AUR-CAD-009":{"id":"AUR-CAD-009","codigo":"AUR-CAD-009","descripcion":"Cadena Calabrote Marinero","tipo":"Cadenas","acabado":"Oro Amarillo 18K | Estilo náutico","peso":1.9,"hechura":26.0,"proveedor":"","fechaCompra":"","costoReal":280.49,"notas":"","estado":"disponible","ventaId":null,"creado":"2026-10-03T02:12:52.509269Z","actualizado":"2026-10-03T02:12:52.509269Z","origen":"Catalogo_AURE_Cotizador_53_Piezas","lote":"Factura inicial (53 piezas)","ajusteFactura":{"monto":14867.16,"fecha":"2026-10-02","factor":1.601418}},"AUR-CAD-010":{"id":"AUR-CAD-010","codigo":"AUR-CAD-010","descripcion":"Gargantilla Ala de Ángel Pavé","tipo":"Cadenas","acabado":"Oro Amarillo 18K & Pavé Circonias","peso":2.1,"hechura":28.0,"proveedor":"","fechaCompra":"","costoReal":308.83,"notas":"","estado":"disponible","ventaId":null,"creado":"2026-10-03T02:12:52.509269Z","actualizado":"2026-10-03T02:12:52.509269Z","origen":"Catalogo_AURE_Cotizador_53_Piezas","lote":"Factura inicial (53 piezas)","ajusteFactura":{"monto":14867.16,"fecha":"2026-10-02","factor":1.601418}},"AUR-CAD-011":{"id":"AUR-CAD-011","codigo":"AUR-CAD-011","descripcion":"Gargantilla Perla Cultivada","tipo":"Cadenas","acabado":"Oro Amarillo 18K & Perla Natural","peso":1.9,"hechura":24.0,"proveedor":"","fechaCompra":"","costoReal":277.29,"notas":"","estado":"disponible","ventaId":null,"creado":"2026-10-03T02:12:52.509269Z","actualizado":"2026-10-03T02:12:52.509269Z","origen":"Catalogo_AURE_Cotizador_53_Piezas","lote":"Factura inicial (53 piezas)","ajusteFactura":{"monto":14867.16,"fecha":"2026-10-02","factor":1.601418}},"AUR-CAD-012":{"id":"AUR-CAD-012","codigo":"AUR-CAD-012","descripcion":"Gargantilla Corazón Inflado Liso","tipo":"Cadenas","acabado":"Oro Amarillo 18K | Pulido espejo","peso":3.0,"hechura":25.0,"proveedor":"","fechaCompra":"","costoReal":417.17,"notas":"","estado":"disponible","ventaId":null,"creado":"2026-10-03T02:12:52.509269Z","actualizado":"2026-10-03T02:12:52.509269Z","origen":"Catalogo_AURE_Cotizador_53_Piezas","lote":"Factura inicial (53 piezas)","ajusteFactura":{"monto":14867.16,"fecha":"2026-10-02","factor":1.601418}},"AUR-CAD-013":{"id":"AUR-CAD-013","codigo":"AUR-CAD-013","descripcion":"Gargantilla Punto de Luz Bisel Grande","tipo":"Cadenas","acabado":"Oro Amarillo 18K & Circonia brillante","peso":1.8,"hechura":26.0,"proveedor":"","fechaCompra":"","costoReal":267.92,"notas":"","estado":"disponible","ventaId":null,"creado":"2026-10-03T02:12:52.509269Z","actualizado":"2026-10-03T02:12:52.509269Z","origen":"Catalogo_AURE_Cotizador_53_Piezas","lote":"Factura inicial (53 piezas)","ajusteFactura":{"monto":14867.16,"fecha":"2026-10-02","factor":1.601418}},"AUR-CAD-014":{"id":"AUR-CAD-014","codigo":"AUR-CAD-014","descripcion":"Cadena Bolitas Tricolor Espaciadas","tipo":"Cadenas","acabado":"Oro Amarillo, Blanco y Rosa","peso":3.5,"hechura":28.0,"proveedor":"","fechaCompra":"","costoReal":484.83,"notas":"","estado":"disponible","ventaId":null,"creado":"2026-10-03T02:12:52.509269Z","actualizado":"2026-10-03T02:12:52.509269Z","origen":"Catalogo_AURE_Cotizador_53_Piezas","lote":"Factura inicial (53 piezas)","ajusteFactura":{"monto":14867.16,"fecha":"2026-10-02","factor":1.601418}},"AUR-CAD-015":{"id":"AUR-CAD-015","codigo":"AUR-CAD-015","descripcion":"Cadena Lentejuelas Espejo","tipo":"Cadenas","acabado":"Oro Amarillo 18K | Tejido espejo","peso":2.1,"hechura":22.0,"proveedor":"","fechaCompra":"","costoReal":299.22,"notas":"","estado":"disponible","ventaId":null,"creado":"2026-10-03T02:12:52.509269Z","actualizado":"2026-10-03T02:12:52.509269Z","origen":"Catalogo_AURE_Cotizador_53_Piezas","lote":"Factura inicial (53 piezas)","ajusteFactura":{"monto":14867.16,"fecha":"2026-10-02","factor":1.601418}},"AUR-CAD-016":{"id":"AUR-CAD-016","codigo":"AUR-CAD-016","descripcion":"Cadena Cordón con Cruz Clásica","tipo":"Cadenas","acabado":"Oro Amarillo 18K | Símbolo devocional","peso":4.4,"hechura":45.0,"proveedor":"","fechaCompra":"","costoReal":625.19,"notas":"","estado":"disponible","ventaId":null,"creado":"2026-10-03T02:12:52.509269Z","actualizado":"2026-10-03T02:12:52.509269Z","origen":"Catalogo_AURE_Cotizador_53_Piezas","lote":"Factura inicial (53 piezas)","ajusteFactura":{"monto":14867.16,"fecha":"2026-10-02","factor":1.601418}},"AUR-CAD-017":{"id":"AUR-CAD-017","codigo":"AUR-CAD-017","descripcion":"Gargantilla Bolitas Diamantadas Oro","tipo":"Cadenas","acabado":"Oro Amarillo 18K | Textura destello","peso":4.3,"hechura":32.0,"proveedor":"","fechaCompra":"","costoReal":591.8,"notas":"","estado":"disponible","ventaId":null,"creado":"2026-10-03T02:12:52.509269Z","actualizado":"2026-10-03T02:12:52.509269Z","origen":"Catalogo_AURE_Cotizador_53_Piezas","lote":"Factura inicial (53 piezas)","ajusteFactura":{"monto":14867.16,"fecha":"2026-10-02","factor":1.601418}},"AUR-DIJ-025":{"id":"AUR-DIJ-025","codigo":"AUR-DIJ-025","descripcion":"Dije Pez de Jesús (Ichtus)","tipo":"Dijes & Medallas","acabado":"Oro Amarillo 18K | Símbolo de fe","peso":0.8,"hechura":14.0,"proveedor":"","fechaCompra":"","costoReal":122.99,"notas":"","estado":"disponible","ventaId":null,"creado":"2026-10-03T02:12:52.509269Z","actualizado":"2026-10-03T02:12:52.509269Z","origen":"Catalogo_AURE_Cotizador_53_Piezas","lote":"Factura inicial (53 piezas)","ajusteFactura":{"monto":14867.16,"fecha":"2026-10-02","factor":1.601418}},"AUR-DIJ-026":{"id":"AUR-DIJ-026","codigo":"AUR-DIJ-026","descripcion":"Dije Trébol Calado Silueta","tipo":"Dijes & Medallas","acabado":"Oro Amarillo 18K | Buena fortuna","peso":1.1,"hechura":14.0,"proveedor":"","fechaCompra":"","costoReal":160.7,"notas":"","estado":"disponible","ventaId":null,"creado":"2026-10-03T02:12:52.509269Z","actualizado":"2026-10-03T02:12:52.509269Z","origen":"Catalogo_AURE_Cotizador_53_Piezas","lote":"Factura inicial (53 piezas)","ajusteFactura":{"monto":14867.16,"fecha":"2026-10-02","factor":1.601418}},"AUR-DIJ-027":{"id":"AUR-DIJ-027","codigo":"AUR-DIJ-027","descripcion":"Dije Corazón Inflado Mini","tipo":"Dijes & Medallas","acabado":"Oro Amarillo 18K | Acabado brillante","peso":0.6,"hechura":12.0,"proveedor":"","fechaCompra":"","costoReal":94.64,"notas":"","estado":"disponible","ventaId":null,"creado":"2026-10-03T02:12:52.509269Z","actualizado":"2026-10-03T02:12:52.509269Z","origen":"Catalogo_AURE_Cotizador_53_Piezas","lote":"Factura inicial (53 piezas)","ajusteFactura":{"monto":14867.16,"fecha":"2026-10-02","factor":1.601418}},"AUR-DIJ-028":{"id":"AUR-DIJ-028","codigo":"AUR-DIJ-028","descripcion":"Dije Placa Militar con Cruz Calada","tipo":"Dijes & Medallas","acabado":"Oro Amarillo 18K | Estilo minimalista","peso":1.0,"hechura":15.0,"proveedor":"","fechaCompra":"","costoReal":149.73,"notas":"","estado":"disponible","ventaId":null,"creado":"2026-10-03T02:12:52.509269Z","actualizado":"2026-10-03T02:12:52.509269Z","origen":"Catalogo_AURE_Cotizador_53_Piezas","lote":"Factura inicial (53 piezas)","ajusteFactura":{"monto":14867.16,"fecha":"2026-10-02","factor":1.601418}},"AUR-DIJ-029":{"id":"AUR-DIJ-029","codigo":"AUR-DIJ-029","descripcion":"Cruz Tubular con Pavé de Circones","tipo":"Dijes & Medallas","acabado":"Oro Amarillo 18K & Circonias finas","peso":1.4,"hechura":20.0,"proveedor":"","fechaCompra":"","costoReal":208.02,"notas":"","estado":"disponible","ventaId":null,"creado":"2026-10-03T02:12:52.509269Z","actualizado":"2026-10-03T02:12:52.509269Z","origen":"Catalogo_AURE_Cotizador_53_Piezas","lote":"Factura inicial (53 piezas)","ajusteFactura":{"monto":14867.16,"fecha":"2026-10-02","factor":1.601418}},"AUR-DIJ-030":{"id":"AUR-DIJ-030","codigo":"AUR-DIJ-030","descripcion":"Dije Corazón Labrado Diamantado","tipo":"Dijes & Medallas","acabado":"Oro Amarillo 18K | Diamantado fino","peso":1.4,"hechura":15.0,"proveedor":"","fechaCompra":"","costoReal":200.02,"notas":"","estado":"disponible","ventaId":null,"creado":"2026-10-03T02:12:52.509269Z","actualizado":"2026-10-03T02:12:52.509269Z","origen":"Catalogo_AURE_Cotizador_53_Piezas","lote":"Factura inicial (53 piezas)","ajusteFactura":{"monto":14867.16,"fecha":"2026-10-02","factor":1.601418}},"AUR-DIJ-031":{"id":"AUR-DIJ-031","codigo":"AUR-DIJ-031","descripcion":"Dije Cornicello Esmaltado Rojo","tipo":"Dijes & Medallas","acabado":"Oro Amarillo 18K & Esmalte rojo","peso":0.4,"hechura":14.0,"proveedor":"","fechaCompra":"","costoReal":72.7,"notas":"","estado":"disponible","ventaId":null,"creado":"2026-10-03T02:12:52.509269Z","actualizado":"2026-10-03T02:12:52.509269Z","origen":"Catalogo_AURE_Cotizador_53_Piezas","lote":"Factura inicial (53 piezas)","ajusteFactura":{"monto":14867.16,"fecha":"2026-10-02","factor":1.601418}},"AUR-DIJ-032":{"id":"AUR-DIJ-032","codigo":"AUR-DIJ-032","descripcion":"Mini Dije Corazón Punto de Luz","tipo":"Dijes & Medallas","acabado":"Oro Amarillo 18K & Circonia","peso":0.4,"hechura":12.0,"proveedor":"","fechaCompra":"","costoReal":69.5,"notas":"","estado":"disponible","ventaId":null,"creado":"2026-10-03T02:12:52.509269Z","actualizado":"2026-10-03T02:12:52.509269Z","origen":"Catalogo_AURE_Cotizador_53_Piezas","lote":"Factura inicial (53 piezas)","ajusteFactura":{"monto":14867.16,"fecha":"2026-10-02","factor":1.601418}},"AUR-DIJ-033":{"id":"AUR-DIJ-033","codigo":"AUR-DIJ-033","descripcion":"Dije Cornicello Clásico en Oro","tipo":"Dijes & Medallas","acabado":"Oro Amarillo 18K | Pulido espejo","peso":0.5,"hechura":14.0,"proveedor":"","fechaCompra":"","costoReal":85.28,"notas":"","estado":"disponible","ventaId":null,"creado":"2026-10-03T02:12:52.509269Z","actualizado":"2026-10-03T02:12:52.509269Z","origen":"Catalogo_AURE_Cotizador_53_Piezas","lote":"Factura inicial (53 piezas)","ajusteFactura":{"monto":14867.16,"fecha":"2026-10-02","factor":1.601418}},"AUR-PUL-018":{"id":"AUR-PUL-018","codigo":"AUR-PUL-018","descripcion":"Pulsera Denario 3 Oros (Misterio)","tipo":"Pulseras","acabado":"Oro Amarillo, Blanco y Rosa 18K","peso":1.4,"hechura":18.0,"proveedor":"","fechaCompra":"","costoReal":204.82,"notas":"","estado":"disponible","ventaId":null,"creado":"2026-10-03T02:12:52.509269Z","actualizado":"2026-10-03T02:12:52.509269Z","origen":"Catalogo_AURE_Cotizador_53_Piezas","lote":"Factura inicial (53 piezas)","ajusteFactura":{"monto":14867.16,"fecha":"2026-10-02","factor":1.601418}},"AUR-PUL-019":{"id":"AUR-PUL-019","codigo":"AUR-PUL-019","descripcion":"Pulsera de Perlas Cultivadas","tipo":"Pulseras","acabado":"Oro Amarillo 18K & Perlas Cultivadas","peso":1.7,"hechura":20.0,"proveedor":"","fechaCompra":"","costoReal":245.74,"notas":"","estado":"disponible","ventaId":null,"creado":"2026-10-03T02:12:52.509269Z","actualizado":"2026-10-03T02:12:52.509269Z","origen":"Catalogo_AURE_Cotizador_53_Piezas","lote":"Factura inicial (53 piezas)","ajusteFactura":{"monto":14867.16,"fecha":"2026-10-02","factor":1.601418}},"AUR-PUL-020":{"id":"AUR-PUL-020","codigo":"AUR-PUL-020","descripcion":"Pulsera Denario con Cruz y Medalla","tipo":"Pulseras","acabado":"Oro Amarillo 18K | Símbolo de devoción","peso":1.3,"hechura":18.0,"proveedor":"","fechaCompra":"","costoReal":192.25,"notas":"","estado":"disponible","ventaId":null,"creado":"2026-10-03T02:12:52.509269Z","actualizado":"2026-10-03T02:12:52.509269Z","origen":"Catalogo_AURE_Cotizador_53_Piezas","lote":"Factura inicial (53 piezas)","ajusteFactura":{"monto":14867.16,"fecha":"2026-10-02","factor":1.601418}},"AUR-PUL-021":{"id":"AUR-PUL-021","codigo":"AUR-PUL-021","descripcion":"Pulsera Bolitas Tricolor Espaciadas","tipo":"Pulseras","acabado":"Oro Amarillo, Blanco y Rosa 18K","peso":2.4,"hechura":22.0,"proveedor":"","fechaCompra":"","costoReal":336.94,"notas":"","estado":"disponible","ventaId":null,"creado":"2026-10-03T02:12:52.509269Z","actualizado":"2026-10-03T02:12:52.509269Z","origen":"Catalogo_AURE_Cotizador_53_Piezas","lote":"Factura inicial (53 piezas)","ajusteFactura":{"monto":14867.16,"fecha":"2026-10-02","factor":1.601418}},"AUR-PUL-022":{"id":"AUR-PUL-022","codigo":"AUR-PUL-022","descripcion":"Pulsera Paperclip con Cruces","tipo":"Pulseras","acabado":"Oro Amarillo 18K | Diseño moderno","peso":1.6,"hechura":20.0,"proveedor":"","fechaCompra":"","costoReal":233.17,"notas":"","estado":"disponible","ventaId":null,"creado":"2026-10-03T02:12:52.509269Z","actualizado":"2026-10-03T02:12:52.509269Z","origen":"Catalogo_AURE_Cotizador_53_Piezas","lote":"Factura inicial (53 piezas)","ajusteFactura":{"monto":14867.16,"fecha":"2026-10-02","factor":1.601418}},"AUR-PUL-023":{"id":"AUR-PUL-023","codigo":"AUR-PUL-023","descripcion":"Pulsera Paperclip Central","tipo":"Pulseras","acabado":"Oro Amarillo 18K | Estilo contemporáneo","peso":1.9,"hechura":20.0,"proveedor":"","fechaCompra":"","costoReal":270.88,"notas":"","estado":"disponible","ventaId":null,"creado":"2026-10-03T02:12:52.509269Z","actualizado":"2026-10-03T02:12:52.509269Z","origen":"Catalogo_AURE_Cotizador_53_Piezas","lote":"Factura inicial (53 piezas)","ajusteFactura":{"monto":14867.16,"fecha":"2026-10-02","factor":1.601418}},"AUR-PUL-024":{"id":"AUR-PUL-024","codigo":"AUR-PUL-024","descripcion":"Pulsera Ojo Turco Protección","tipo":"Pulseras","acabado":"Oro Amarillo 18K & Esmalte de protección","peso":1.2,"hechura":18.0,"proveedor":"","fechaCompra":"","costoReal":179.68,"notas":"","estado":"disponible","ventaId":null,"creado":"2026-10-03T02:12:52.509269Z","actualizado":"2026-10-03T02:12:52.509269Z","origen":"Catalogo_AURE_Cotizador_53_Piezas","lote":"Factura inicial (53 piezas)","ajusteFactura":{"monto":14867.16,"fecha":"2026-10-02","factor":1.601418}},"AUR-ZAR-034":{"id":"AUR-ZAR-034","codigo":"AUR-ZAR-034","descripcion":"Argollas Facetadas Diamantadas","tipo":"Argollas","acabado":"Oro Amarillo 18K | Acabado brillante","peso":1.3,"hechura":25.0,"proveedor":"","fechaCompra":"","costoReal":203.46,"notas":"","estado":"disponible","ventaId":null,"creado":"2026-10-03T02:12:52.509269Z","actualizado":"2026-10-03T02:12:52.509269Z","origen":"Catalogo_AURE_Cotizador_53_Piezas","lote":"Factura inicial (53 piezas)","ajusteFactura":{"monto":14867.16,"fecha":"2026-10-02","factor":1.601418}},"AUR-ZAR-035":{"id":"AUR-ZAR-035","codigo":"AUR-ZAR-035","descripcion":"Huggies Malla Micropunto","tipo":"Huggies","acabado":"Oro Amarillo 18K | Acabado satinado","peso":1.4,"hechura":20.0,"proveedor":"","fechaCompra":"","costoReal":208.02,"notas":"","estado":"disponible","ventaId":null,"creado":"2026-10-03T02:12:52.509269Z","actualizado":"2026-10-03T02:12:52.509269Z","origen":"Catalogo_AURE_Cotizador_53_Piezas","lote":"Factura inicial (53 piezas)","ajusteFactura":{"monto":14867.16,"fecha":"2026-10-02","factor":1.601418}},"AUR-ZAR-036":{"id":"AUR-ZAR-036","codigo":"AUR-ZAR-036","descripcion":"Argollas Cinta Pulida Espejo","tipo":"Argollas","acabado":"Oro Amarillo 18K | Pulido espejo","peso":2.3,"hechura":28.0,"proveedor":"","fechaCompra":"","costoReal":333.98,"notas":"","estado":"disponible","ventaId":null,"creado":"2026-10-03T02:12:52.509269Z","actualizado":"2026-10-03T02:12:52.509269Z","origen":"Catalogo_AURE_Cotizador_53_Piezas","lote":"Factura inicial (53 piezas)","ajusteFactura":{"monto":14867.16,"fecha":"2026-10-02","factor":1.601418}},"AUR-ZAR-037":{"id":"AUR-ZAR-037","codigo":"AUR-ZAR-037","descripcion":"Huggies Angulares Geométricos","tipo":"Huggies","acabado":"Oro Amarillo 18K | Labrado geométrico","peso":2.3,"hechura":24.0,"proveedor":"","fechaCompra":"","costoReal":327.57,"notas":"","estado":"disponible","ventaId":null,"creado":"2026-10-03T02:12:52.509269Z","actualizado":"2026-10-03T02:12:52.509269Z","origen":"Catalogo_AURE_Cotizador_53_Piezas","lote":"Factura inicial (53 piezas)","ajusteFactura":{"monto":14867.16,"fecha":"2026-10-02","factor":1.601418}},"AUR-ZAR-038":{"id":"AUR-ZAR-038","codigo":"AUR-ZAR-038","descripcion":"Argollas Espiga Diamantada","tipo":"Argollas","acabado":"Oro Amarillo 18K | Diamantado fino","peso":0.7,"hechura":20.0,"proveedor":"","fechaCompra":"","costoReal":120.03,"notas":"","estado":"disponible","ventaId":null,"creado":"2026-10-03T02:12:52.509269Z","actualizado":"2026-10-03T02:12:52.509269Z","origen":"Catalogo_AURE_Cotizador_53_Piezas","lote":"Factura inicial (53 piezas)","ajusteFactura":{"monto":14867.16,"fecha":"2026-10-02","factor":1.601418}},"AUR-ZAR-039":{"id":"AUR-ZAR-039","codigo":"AUR-ZAR-039","descripcion":"Huggies Triple Canal en Relieve","tipo":"Huggies","acabado":"Oro Amarillo 18K | Pulido liso","peso":2.2,"hechura":22.0,"proveedor":"","fechaCompra":"","costoReal":311.8,"notas":"","estado":"disponible","ventaId":null,"creado":"2026-10-03T02:12:52.509269Z","actualizado":"2026-10-03T02:12:52.509269Z","origen":"Catalogo_AURE_Cotizador_53_Piezas","lote":"Factura inicial (53 piezas)","ajusteFactura":{"monto":14867.16,"fecha":"2026-10-02","factor":1.601418}},"AUR-ZAR-040":{"id":"AUR-ZAR-040","codigo":"AUR-ZAR-040","descripcion":"Aretes Media Caña Cepillada","tipo":"Topos","acabado":"Oro Amarillo 18K | Textura lineal","peso":3.5,"hechura":30.0,"proveedor":"","fechaCompra":"","costoReal":488.03,"notas":"","estado":"disponible","ventaId":null,"creado":"2026-10-03T02:12:52.509269Z","actualizado":"2026-10-03T02:12:52.509269Z","origen":"Catalogo_AURE_Cotizador_53_Piezas","lote":"Factura inicial (53 piezas)","ajusteFactura":{"monto":14867.16,"fecha":"2026-10-02","factor":1.601418}},"AUR-ZAR-041":{"id":"AUR-ZAR-041","codigo":"AUR-ZAR-041","descripcion":"Argollas Finas Micro-Labradas","tipo":"Argollas","acabado":"Oro Amarillo 18K | Textura diamantada","peso":1.4,"hechura":18.0,"proveedor":"","fechaCompra":"","costoReal":204.82,"notas":"","estado":"disponible","ventaId":null,"creado":"2026-10-03T02:12:52.509269Z","actualizado":"2026-10-03T02:12:52.509269Z","origen":"Catalogo_AURE_Cotizador_53_Piezas","lote":"Factura inicial (53 piezas)","ajusteFactura":{"monto":14867.16,"fecha":"2026-10-02","factor":1.601418}},"AUR-ZAR-042":{"id":"AUR-ZAR-042","codigo":"AUR-ZAR-042","descripcion":"Huggies Abombados Clásicos","tipo":"Huggies","acabado":"Oro Amarillo 18K | Pulido espejo","peso":1.9,"hechura":22.0,"proveedor":"","fechaCompra":"","costoReal":274.08,"notas":"","estado":"disponible","ventaId":null,"creado":"2026-10-03T02:12:52.509269Z","actualizado":"2026-10-03T02:12:52.509269Z","origen":"Catalogo_AURE_Cotizador_53_Piezas","lote":"Factura inicial (53 piezas)","ajusteFactura":{"monto":14867.16,"fecha":"2026-10-02","factor":1.601418}},"AUR-ZAR-043":{"id":"AUR-ZAR-043","codigo":"AUR-ZAR-043","descripcion":"Topos Esféricos Medianos","tipo":"Topos","acabado":"Oro Amarillo 18K | Pulido brillante","peso":0.7,"hechura":15.0,"proveedor":"","fechaCompra":"","costoReal":112.02,"notas":"","estado":"disponible","ventaId":null,"creado":"2026-10-03T02:12:52.509269Z","actualizado":"2026-10-03T02:12:52.509269Z","origen":"Catalogo_AURE_Cotizador_53_Piezas","lote":"Factura inicial (53 piezas)","ajusteFactura":{"monto":14867.16,"fecha":"2026-10-02","factor":1.601418}},"AUR-ZAR-044":{"id":"AUR-ZAR-044","codigo":"AUR-ZAR-044","descripcion":"Topos Esféricos Grandes","tipo":"Topos","acabado":"Oro Amarillo 18K | Pulido espejo","peso":1.6,"hechura":18.0,"proveedor":"","fechaCompra":"","costoReal":229.96,"notas":"","estado":"disponible","ventaId":null,"creado":"2026-10-03T02:12:52.509269Z","actualizado":"2026-10-03T02:12:52.509269Z","origen":"Catalogo_AURE_Cotizador_53_Piezas","lote":"Factura inicial (53 piezas)","ajusteFactura":{"monto":14867.16,"fecha":"2026-10-02","factor":1.601418}},"AUR-ZAR-045":{"id":"AUR-ZAR-045","codigo":"AUR-ZAR-045","descripcion":"Topos Punto de Luz Biselados","tipo":"Topos","acabado":"Oro Amarillo 18K & Circonia fina","peso":2.7,"hechura":16.0,"proveedor":"","fechaCompra":"","costoReal":365.04,"notas":"","estado":"disponible","ventaId":null,"creado":"2026-10-03T02:12:52.509269Z","actualizado":"2026-10-03T02:12:52.509269Z","origen":"Catalogo_AURE_Cotizador_53_Piezas","lote":"Factura inicial (53 piezas)","ajusteFactura":{"monto":14867.16,"fecha":"2026-10-02","factor":1.601418}},"AUR-ZAR-046":{"id":"AUR-ZAR-046","codigo":"AUR-ZAR-046","descripcion":"Juego Solitario Punto de Luz","tipo":"Juegos","acabado":"Oro Amarillo 18K | Conjunto Dije & Aretes","peso":4.5,"hechura":45.0,"proveedor":"","fechaCompra":"","costoReal":637.76,"notas":"","estado":"disponible","ventaId":null,"creado":"2026-10-03T02:12:52.509269Z","actualizado":"2026-10-03T02:12:52.509269Z","origen":"Catalogo_AURE_Cotizador_53_Piezas","lote":"Factura inicial (53 piezas)","ajusteFactura":{"monto":14867.16,"fecha":"2026-10-02","factor":1.601418}},"AUR-ZAR-047":{"id":"AUR-ZAR-047","codigo":"AUR-ZAR-047","descripcion":"Topos Bolas Diamantadas","tipo":"Topos","acabado":"Oro Amarillo 18K | Textura espiral","peso":0.9,"hechura":16.0,"proveedor":"","fechaCompra":"","costoReal":138.76,"notas":"","estado":"disponible","ventaId":null,"creado":"2026-10-03T02:12:52.509269Z","actualizado":"2026-10-03T02:12:52.509269Z","origen":"Catalogo_AURE_Cotizador_53_Piezas","lote":"Factura inicial (53 piezas)","ajusteFactura":{"monto":14867.16,"fecha":"2026-10-02","factor":1.601418}},"AUR-ZAR-048":{"id":"AUR-ZAR-048","codigo":"AUR-ZAR-048","descripcion":"Topos Bisel Mini Punto de Luz","tipo":"Topos","acabado":"Oro Amarillo 18K & Circonia","peso":1.7,"hechura":15.0,"proveedor":"","fechaCompra":"","costoReal":237.73,"notas":"","estado":"disponible","ventaId":null,"creado":"2026-10-03T02:12:52.509269Z","actualizado":"2026-10-03T02:12:52.509269Z","origen":"Catalogo_AURE_Cotizador_53_Piezas","lote":"Factura inicial (53 piezas)","ajusteFactura":{"monto":14867.16,"fecha":"2026-10-02","factor":1.601418}},"AUR-ZAR-049":{"id":"AUR-ZAR-049","codigo":"AUR-ZAR-049","descripcion":"Topos Esfera Clásica Mini","tipo":"Topos","acabado":"Oro Amarillo 18K | Pulido espejo","peso":1.1,"hechura":12.0,"proveedor":"","fechaCompra":"","costoReal":157.5,"notas":"","estado":"disponible","ventaId":null,"creado":"2026-10-03T02:12:52.509269Z","actualizado":"2026-10-03T02:12:52.509269Z","origen":"Catalogo_AURE_Cotizador_53_Piezas","lote":"Factura inicial (53 piezas)","ajusteFactura":{"monto":14867.16,"fecha":"2026-10-02","factor":1.601418}},"AUR-ZAR-050":{"id":"AUR-ZAR-050","codigo":"AUR-ZAR-050","descripcion":"Aretes Prisma Geométrico","tipo":"Topos","acabado":"Oro Amarillo 18K | Facetado espejo","peso":4.2,"hechura":26.0,"proveedor":"","fechaCompra":"","costoReal":569.62,"notas":"","estado":"disponible","ventaId":null,"creado":"2026-10-03T02:12:52.509269Z","actualizado":"2026-10-03T02:12:52.509269Z","origen":"Catalogo_AURE_Cotizador_53_Piezas","lote":"Factura inicial (53 piezas)","ajusteFactura":{"monto":14867.16,"fecha":"2026-10-02","factor":1.601418}},"AUR-ZAR-051":{"id":"AUR-ZAR-051","codigo":"AUR-ZAR-051","descripcion":"Topos Labrados Satinados","tipo":"Topos","acabado":"Oro Amarillo 18K | Micro-textura","peso":0.6,"hechura":15.0,"proveedor":"","fechaCompra":"","costoReal":99.45,"notas":"","estado":"disponible","ventaId":null,"creado":"2026-10-03T02:12:52.509269Z","actualizado":"2026-10-03T02:12:52.509269Z","origen":"Catalogo_AURE_Cotizador_53_Piezas","lote":"Factura inicial (53 piezas)","ajusteFactura":{"monto":14867.16,"fecha":"2026-10-02","factor":1.601418}},"AUR-ZAR-052":{"id":"AUR-ZAR-052","codigo":"AUR-ZAR-052","descripcion":"Topos Solitarios 4 Garras","tipo":"Topos","acabado":"Oro Amarillo 18K & Circonia fina","peso":0.9,"hechura":16.0,"proveedor":"","fechaCompra":"","costoReal":138.76,"notas":"","estado":"disponible","ventaId":null,"creado":"2026-10-03T02:12:52.509269Z","actualizado":"2026-10-03T02:12:52.509269Z","origen":"Catalogo_AURE_Cotizador_53_Piezas","lote":"Factura inicial (53 piezas)","ajusteFactura":{"monto":14867.16,"fecha":"2026-10-02","factor":1.601418}},"AUR-ZAR-053":{"id":"AUR-ZAR-053","codigo":"AUR-ZAR-053","descripcion":"Topos Corazón Rayado","tipo":"Topos","acabado":"Oro Amarillo 18K | Rayo de sol","peso":0.8,"hechura":18.0,"proveedor":"","fechaCompra":"","costoReal":129.43,"notas":"","estado":"disponible","ventaId":null,"creado":"2026-10-03T02:12:52.509269Z","actualizado":"2026-10-03T02:12:52.509269Z","origen":"Catalogo_AURE_Cotizador_53_Piezas","lote":"Factura inicial (53 piezas)","ajusteFactura":{"monto":14867.16,"fecha":"2026-10-02","factor":1.601418}}}};
+/* ============ Estado y utilidades ============ */
+const S={tarifa:null,acc:null,marca:null,art:{},cli:{},ven:{},loaded:false};
+const COL={art:'articulos',cli:'clientes',ven:'ventas'};
+let DB=null, MODE='local', canWrite=true, DL=null, TAB='resumen';
+const UI={invFiltro:'disponible',invQ:'',invCat:'',cliQ:'',venFiltro:'abiertas'};
+const LS_KEY='aure-oro-v1';
+
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const r2=n=>Math.round((+n||0)*100)/100;
+const sum=a=>r2(a.reduce((x,y)=>x+(+y||0),0));
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+const pad=(n,l=4)=>String(n).padStart(l,'0');
+const T=()=>S.tarifa||{oro:0,margen:35,recargo:0,tasa:0,historial:[]};
+const fmt=n=>(+n||0).toLocaleString('es-VE',{minimumFractionDigits:2,maximumFractionDigits:2});
+const money=n=>'$ '+fmt(n);
+const bs=n=>(+T().tasa>0)?'Bs. '+fmt((+n||0)*T().tasa):'';
+const OZ=31.1035;
+const FAM={'Cadenas':'CAD','Pulseras':'PUL','Dijes & Medallas':'DIJ','Argollas':'ZAR','Huggies':'ZAR','Topos':'ZAR','Zarcillos':'ZAR','Juegos':'JUE','Anillos':'ANI','Esclavas':'ESC','Tobilleras':'TOB','Otro':'OTR'};
+const CATS=Object.keys(FAM);
+function codeArt(tipo){let m=0;Object.values(S.art).forEach(x=>{const n=parseInt((String(x.codigo||'').match(/(\d+)\s*$/)||[])[1]);if(n>m)m=n});return 'AUR-'+(FAM[tipo]||'OTR')+'-'+pad(m+1,3)}
+const grams=n=>fmt(n)+' g';
+const pct=n=>isFinite(n)?(Math.round(n*10)/10).toLocaleString('es-VE')+' %':'—';
+function today(){const d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1,2)+'-'+pad(d.getDate(),2)}
+function pd(s){const [y,m,d]=String(s||today()).split('-').map(Number);return new Date(y,(m||1)-1,d||1)}
+function iso(d){return d.getFullYear()+'-'+pad(d.getMonth()+1,2)+'-'+pad(d.getDate(),2)}
+function fdate(s){if(!s)return '—';const d=pd(s);return pad(d.getDate(),2)+'/'+pad(d.getMonth()+1,2)+'/'+d.getFullYear()}
+function addPeriod(s,freq,k){const d=pd(s);
+  if(freq==='semanal'){d.setDate(d.getDate()+7*k);return iso(d)}
+  if(freq==='quincenal'){d.setDate(d.getDate()+15*k);return iso(d)}
+  const day=d.getDate(), t=new Date(d.getFullYear(),d.getMonth()+k,1);
+  const last=new Date(t.getFullYear(),t.getMonth()+1,0).getDate(); t.setDate(Math.min(day,last)); return iso(t)}
+const ym=s=>String(s||'').slice(0,7);
+
+/* precios: todo sale del precio del oro por gramo
+   costo de reposición = peso × oro/g + hechura · contado = costo × (1+margen) · crédito = contado × (1+recargo) */
+const costoRef=a=>r2((+a.peso||0)*(+T().oro||0)+(+a.hechura||0));
+const costoArt=a=>(+a.costoReal>0)?r2(a.costoReal):costoRef(a);
+const pContado=a=>r2(costoRef(a)*(1+(+T().margen||0)/100));
+const pCredito=a=>r2(pContado(a)*(1+(+T().recargo||0)/100));
+
+/* plan de cuotas */
+function plan(v){
+  const ab=sum((v.abonos||[]).map(a=>a.monto));
+  const pagado=r2((+v.inicial||0)+ab);
+  const saldo=Math.max(0,r2(v.total-pagado));
+  const res={ab,pagado,saldo,cuotas:[],vencido:0,prox:null,estado:'pagada'};
+  if(v.modalidad==='contado'){res.estado=saldo<=0.005?'pagada':'pendiente';return res}
+  const fin=r2(v.total-(+v.inicial||0)), n=Math.max(1,parseInt(v.cuotas)||1);
+  const base=Math.floor(fin/n*100)/100; let rest=ab; const hoy=today();
+  for(let k=1;k<=n;k++){
+    const monto=k<n?base:r2(fin-base*(n-1)), fecha=addPeriod(v.fecha,v.frecuencia,k);
+    const pag=Math.min(rest,monto); rest=r2(rest-pag);
+    const st=pag>=monto-0.005?'pagada':(fecha<hoy?'vencida':'pendiente');
+    if(st==='vencida')res.vencido=r2(res.vencido+monto-pag);
+    if(!res.prox&&st!=='pagada')res.prox={k,fecha,monto:r2(monto-pag)};
+    res.cuotas.push({k,fecha,monto,pag:r2(pag),st});
+  }
+  res.estado=saldo<=0.005?'pagada':(res.vencido>0.005?'atrasada':'aldia');
+  return res;
+}
+const chipEstado=e=>({pagada:'<span class="chip c-ok">Pagada</span>',aldia:'<span class="chip c-ok">Al día</span>',atrasada:'<span class="chip c-bad">Atrasada</span>',pendiente:'<span class="chip c-warn">Pendiente</span>',vencida:'<span class="chip c-bad">Vencida</span>'}[e]||'');
+const ventasDe=cid=>Object.values(S.ven).filter(v=>v.clienteId===cid).sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||''));
+function resumenCliente(cid){
+  const vs=ventasDe(cid); let saldo=0,venc=0,total=0,prox=null,atr=false;
+  vs.forEach(v=>{const p=plan(v);saldo+=p.saldo;venc+=p.vencido;total+=v.total;if(p.estado==='atrasada')atr=true;
+    if(p.prox&&(!prox||p.prox.fecha<prox.fecha))prox=p.prox});
+  return {vs,saldo:r2(saldo),venc:r2(venc),total:r2(total),prox,estado:!vs.length?'sin':(saldo<=0.005?'pagada':(atr?'atrasada':'aldia'))};
+}
+function nextCode(prefix,col,field){let m=0;Object.values(S[col]).forEach(x=>{const n=parseInt(String(x[field]||'').replace(/\D/g,''));if(n>m)m=n});return prefix+pad(m+1)}
+
+/* ============ Persistencia ============ */
+function saveLocal(){try{localStorage.setItem(LS_KEY,JSON.stringify({tarifa:S.tarifa,acc:S.acc,marca:S.marca,art:S.art,cli:S.cli,ven:S.ven}))}catch(e){toast('No se pudo guardar en el teléfono: memoria del navegador llena. Descarga un respaldo.')}}
+function loadLocal(){try{const d=JSON.parse(localStorage.getItem(LS_KEY)||'null');if(d){S.tarifa=d.tarifa||null;S.acc=d.acc||null;S.marca=d.marca||null;S.art=d.art||{};S.cli=d.cli||{};S.ven=d.ven||{}}}catch(e){}}
+function fail(e){const c=e&&e.code;
+  if(c==='invalid_argument'){canWrite=false;toast('No tienes permiso para guardar cambios en esta página.');render();return}
+  if(c==='quota_exceeded'){toast('Se llenó el espacio de datos. Descarga un respaldo y elimina registros viejos.');return}
+  toast('No se pudo guardar. Revisa tu conexión e inténtalo de nuevo.')}
+async function put(k,data){
+  if(!canWrite){toast('Esta vista es solo de lectura.');return false}
+  const id=data.id; data.actualizado=new Date().toISOString();
+  S[k]={...S[k],[id]:data}; render();
+  if(DB){try{await DB.collection(COL[k]).doc(id).set(JSON.parse(JSON.stringify(data)))}catch(e){fail(e);return false}} else saveLocal();
+  return true}
+async function del(k,id){
+  if(!canWrite){toast('Esta vista es solo de lectura.');return}
+  const n={...S[k]};delete n[id];S[k]=n;render();
+  if(DB){try{await DB.collection(COL[k]).doc(id).delete()}catch(e){fail(e)}} else saveLocal()}
+async function putConfig(key,data){
+  if(!canWrite){toast('Esta vista es solo de lectura.');return false}
+  S[key==='acceso'?'acc':key]=data;render();
+  if(DB){try{await DB.doc('config/'+key).set(JSON.parse(JSON.stringify(data)))}catch(e){fail(e);return false}} else saveLocal();
+  return true}
+async function putTarifa(t){
+  if(!canWrite){toast('Esta vista es solo de lectura.');return false}
+  S.tarifa=t;render();
+  if(DB){try{await DB.doc('config/tarifa').set(JSON.parse(JSON.stringify(t)))}catch(e){fail(e);return false}} else saveLocal();
+  return true}
+
+/* ============ Render ============ */
+function render(){
+  const t=T();
+  paintLogo();
+  document.getElementById('rateChip').innerHTML=S.tarifa&&t.oro>0
+    ? `<span class="muted">Oro 18K</span><span><b class="num">${money(t.oro)}/g</b></span><span>Margen <b class="num">${pct(t.margen)}</b></span><span>Crédito <b class="num">+${pct(t.recargo)}</b></span>${t.tasa>0?`<span>Tasa <b class="num">Bs. ${fmt(t.tasa)}</b></span>`:''}<span class="muted num">${fdate(t.fecha)}</span>`
+    : `<span><b>Fija el precio del oro por gramo</b> para calcular precios</span>`;
+  document.getElementById('lockBtn').hidden=!S.acc;
+  document.querySelectorAll('#tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===TAB));
+  const bn=[];
+  let ult=null;try{ult=localStorage.getItem('aure-ultimo-respaldo')}catch(e){}
+  const dias=ult?Math.floor((pd(today())-pd(ult))/864e5):null;
+  const bnAct=[];
+  if(dias===null||dias>=7)bnAct.push(`${dias===null?'Aún no has descargado ningún respaldo.':'Último respaldo hace '+dias+' días.'} Los datos viven solo en este teléfono: guarda un respaldo en WhatsApp, Drive o correo. <button class="btn-sm" data-act="backup" style="margin-left:6px">Descargar respaldo</button>`);
+  if(!canWrite)bn.push('Vista de solo lectura: puedes consultar, pero no guardar cambios.');
+  document.getElementById('banner').innerHTML=bn.map(x=>`<div class="banner">${esc(x)}</div>`).join('')+bnAct.map(x=>`<div class="banner">${x}</div>`).join('');
+  const v=document.getElementById('view');
+  if(S.loaded&&!UNLOCKED){v.innerHTML='';return}
+  if(!S.loaded){v.innerHTML='<div class="empty">Cargando registros…</div>';return}
+  v.innerHTML=({resumen:vResumen,inventario:vInventario,clientes:vClientes,ventas:vVentas,tarifa:vTarifa}[TAB])();
+  if(TAB==='tarifa')tarifaPreview();
+  if(OPEN_FICHA&&S.cli[OPEN_FICHA]&&document.getElementById('modalRoot').dataset.kind==='ficha')openFicha(OPEN_FICHA,true);
+}
+
+function vResumen(){
+  const arts=Object.values(S.art), disp=arts.filter(a=>a.estado!=='vendido');
+  const g=sum(disp.map(a=>a.peso)), vc=sum(disp.map(costoArt)), vco=sum(disp.map(pContado)), vcr=sum(disp.map(pCredito));
+  const vens=Object.values(S.ven); let cxc=0,venc=0,nAtr=0; const proximos=[];
+  const mes=ym(today()); let vMes=0,cMes=0,uMes=0;
+  vens.forEach(v=>{const p=plan(v);cxc+=p.saldo;venc+=p.vencido;if(p.estado==='atrasada')nAtr++;
+    if(ym(v.fecha)===mes){vMes+=v.total;uMes+=v.total-(+v.costoTotal||0);cMes+=(+v.inicial||0)}
+    (v.abonos||[]).forEach(a=>{if(ym(a.fecha)===mes)cMes+=(+a.monto||0)});
+    p.cuotas.filter(c=>c.st!=='pagada').slice(0,2).forEach(c=>proximos.push({v,c}))});
+  const lim=iso(new Date(Date.now()+14*864e5));
+  const cola=proximos.filter(x=>x.c.fecha<=lim).sort((a,b)=>a.c.fecha.localeCompare(b.c.fecha)).slice(0,12);
+  const nombreMes=new Date().toLocaleDateString('es-VE',{month:'long',year:'numeric'});
+  const bajo=disp.filter(a=>pContado(a)<costoArt(a)-0.005), gap=sum(bajo.map(a=>costoArt(a)-pContado(a)));
+  return `
+  <div class="head"><div><div class="eyebrow">Resumen general</div><h2>Así está el negocio hoy</h2></div>
+    <div class="tools"><button class="btn-gold" data-act="new-art">+ Registrar compra</button><button data-act="new-venta">+ Nueva venta</button></div></div>
+  ${bajo.length?`<div class="banner" style="background:var(--bad-bg);color:var(--bad);margin:0 0 16px">${bajo.length} ${bajo.length===1?'pieza tiene':'piezas tienen'} precio de contado por debajo de su costo real (faltan ${money(gap)} en total). Sube el precio del oro por gramo o el margen en <b>Precio del oro y ajustes</b>.</div>`:''}
+  <div class="kpis">
+    <div class="kpi"><div class="l">Inventario disponible</div><div class="v">${disp.length} piezas</div><div class="s num">${grams(g)} de oro 18K</div></div>
+    <div class="kpi"><div class="l">Inversión en inventario</div><div class="v">${money(vc)}</div><div class="s num">Contado ${money(vco)} · Crédito ${money(vcr)}</div></div>
+    <div class="kpi"><div class="l">Por cobrar</div><div class="v">${money(cxc)}</div><div class="s">${vens.filter(v=>plan(v).saldo>0.005).length} cuentas abiertas</div></div>
+    <div class="kpi ${venc>0.005?'alert':''}"><div class="l">Cuotas vencidas</div><div class="v">${money(venc)}</div><div class="s">${nAtr} ${nAtr===1?'cliente atrasado':'cuentas atrasadas'}</div></div>
+  </div>
+  <div class="section"><h3>Movimiento de ${esc(nombreMes)}</h3>
+    <div class="kpis k3">
+      <div class="kpi"><div class="l">Vendido</div><div class="v">${money(vMes)}</div></div>
+      <div class="kpi"><div class="l">Cobrado (iniciales + abonos)</div><div class="v">${money(cMes)}</div></div>
+      <div class="kpi"><div class="l">Utilidad bruta vendida</div><div class="v">${money(uMes)}</div><div class="s">${vMes>0?pct(uMes/vMes*100)+' sobre ventas':'Sin ventas este mes'}</div></div>
+    </div></div>
+  <div class="section"><h3>Cobros de los próximos 14 días y vencidos</h3>
+    ${cola.length?`<div class="panel scroll"><table><thead><tr><th>Fecha</th><th>Cliente</th><th>Venta</th><th>Cuota</th><th class="r">Monto</th><th>Estado</th><th></th></tr></thead><tbody>
+    ${cola.map(({v,c})=>{const cl=S.cli[v.clienteId];return `<tr><td class="num">${fdate(c.fecha)}</td><td>${esc(cl?cl.nombre:'—')}</td><td class="code">${esc(v.numero)}</td><td class="num">${c.k}/${v.cuotas}</td><td class="r">${money(c.monto-c.pag)}</td><td>${chipEstado(c.st)}</td><td><button class="btn-sm" data-act="abono" data-id="${v.id}">Abonar</button></td></tr>`}).join('')}
+    </tbody></table></div>`:`<div class="panel empty"><h3>Nada por cobrar en los próximos 14 días</h3><p>Cuando registres ventas a crédito, aquí aparecen las cuotas que vencen pronto y las atrasadas.</p></div>`}
+  </div>`;
+}
+
+function vInventario(){
+  const q=UI.invQ.toLowerCase();
+  let arts=Object.values(S.art).sort((a,b)=>(a.codigo||'').localeCompare(b.codigo||''));
+  if(UI.invFiltro!=='todos')arts=arts.filter(a=>UI.invFiltro==='vendido'?a.estado==='vendido':a.estado!=='vendido');
+  if(UI.invCat)arts=arts.filter(a=>a.tipo===UI.invCat);
+  if(q)arts=arts.filter(a=>[a.codigo,a.descripcion,a.tipo,a.acabado,a.proveedor].join(' ').toLowerCase().includes(q));
+  const vend=a=>{const v=a.ventaId&&S.ven[a.ventaId];return v?v.items.find(i=>i.id===a.id):null};
+  const rows=arts.map(a=>{const vi=vend(a), sold=a.estado==='vendido';const v=sold&&S.ven[a.ventaId];const cl=v&&S.cli[v.clienteId];
+    return `<tr class="click" data-act="edit-art" data-id="${a.id}">
+    <td class="code">${esc(a.codigo)}</td><td><div class="pz">${thumbHtml(a)}<div>${esc(a.descripcion)}<div class="hint">${esc(a.tipo||'')}${a.acabado?' · '+esc(a.acabado):''}${a.proveedor?' · '+esc(a.proveedor):''}</div></div></div></td>
+    <td class="r">${grams(a.peso)}</td><td class="r">${money(costoArt(a))}${+a.costoReal>0?'<div class="hint">real</div>':''}</td>
+    <td class="r">${sold?'<span class="muted">—</span>':money(pContado(a))+(bs(1)?`<div class="hint">${bs(pContado(a))}</div>`:'')+(pContado(a)<costoArt(a)-0.005?'<div><span class="chip c-bad">Bajo costo</span></div>':'')}</td><td class="r">${sold?(vi?money(vi.precio)+'<div class="hint">vendido</div>':'—'):money(pCredito(a))}</td>
+    <td>${sold?`<span class="chip c-n">Vendido</span><div class="hint">${esc(cl?cl.nombre:'')}</div>`:'<span class="chip c-ok">Disponible</span>'}</td></tr>`}).join('');
+  const disp=arts.filter(a=>a.estado!=='vendido');
+  return `
+  <div class="head"><div><div class="eyebrow">Compras registradas</div><h2>Inventario de oro 18K</h2></div>
+    <div class="tools"><button class="btn-gold" data-act="new-art">+ Registrar compra</button><button data-act="factura">Ajustar a factura</button><button class="btn-ghost" data-act="csv">Descargar CSV</button></div></div>
+  <div class="tools" style="margin-bottom:12px">
+    <div class="seg" role="group">${['disponible','vendido','todos'].map(f=>`<button data-act="inv-f" data-f="${f}" aria-pressed="${UI.invFiltro===f}">${{disponible:'Disponibles',vendido:'Vendidas',todos:'Todas'}[f]}</button>`).join('')}</div>
+    <select id="invCat" style="max-width:200px"><option value="">Todas las categorías</option>${[...new Set(Object.values(S.art).map(a=>a.tipo).filter(Boolean))].sort().map(c=>`<option ${UI.invCat===c?'selected':''}>${esc(c)}</option>`).join('')}</select>
+    <input id="invQ" type="search" placeholder="Buscar por código, pieza o acabado" value="${esc(UI.invQ)}" style="max-width:300px">
+  </div>
+  ${arts.length?`<div class="panel scroll"><table><thead><tr><th>Código</th><th>Pieza</th><th class="r">Peso</th><th class="r">Costo</th><th class="r">Contado</th><th class="r">Crédito</th><th>Estado</th></tr></thead>
+  <tbody>${rows}</tbody>${disp.length?`<tfoot><tr><td colspan="2">${disp.length} disponibles</td><td class="r">${grams(sum(disp.map(a=>a.peso)))}</td><td class="r">${money(sum(disp.map(costoArt)))}</td><td class="r">${money(sum(disp.map(pContado)))}</td><td class="r">${money(sum(disp.map(pCredito)))}</td><td></td></tr></tfoot>`:''}</table></div>
+  <p class="hint">Precio de contado = (peso × oro/g + hechura) × (1 + margen). Crédito = contado + recargo. Se recalculan al cambiar el precio del oro; al vender, el precio queda fijado en la venta.</p>`
+  :`<div class="panel empty"><h3>${Object.keys(S.art).length?'Ninguna pieza coincide':'Aún no hay compras registradas'}</h3><p>Registra cada pieza con su peso y su hechura. El costo, el precio de contado y el de crédito se calculan solos con el precio del oro.</p><button class="btn-gold" data-act="new-art">+ Registrar la primera compra</button></div>`}`;
+}
+
+function vClientes(){
+  const q=UI.cliQ.toLowerCase();
+  let cs=Object.values(S.cli).sort((a,b)=>(a.nombre||'').localeCompare(b.nombre||''));
+  if(q)cs=cs.filter(c=>[c.nombre,c.cedula,c.telefono].join(' ').toLowerCase().includes(q));
+  return `
+  <div class="head"><div><div class="eyebrow">Fichas de clientes</div><h2>Clientes</h2></div>
+    <div class="tools"><button class="btn-gold" data-act="new-cli">+ Nueva ficha</button></div></div>
+  <div class="tools" style="margin-bottom:12px"><input id="cliQ" type="search" placeholder="Buscar por nombre, cédula o teléfono" value="${esc(UI.cliQ)}" style="max-width:340px"></div>
+  ${cs.length?`<div class="cards">${cs.map(c=>{const r=resumenCliente(c.id);return `<button class="ccard" data-act="ficha" data-id="${c.id}">
+    <div style="display:flex;justify-content:space-between;gap:8px;align-items:start"><span class="n">${esc(c.nombre)}</span>${r.estado==='sin'?'<span class="chip c-n">Sin compras</span>':chipEstado(r.estado)}</div>
+    <div class="hint">${esc([c.cedula&&('C.I. '+c.cedula),c.telefono].filter(Boolean).join(' · ')||'Sin datos de contacto')}</div>
+    <div class="row"><span class="muted">Compras</span><b class="num">${money(r.total)}</b></div>
+    <div class="row"><span class="muted">Saldo</span><b class="num">${money(r.saldo)}</b></div>
+    <div class="row"><span class="muted">Próxima cuota</span><span class="num">${r.prox?fdate(r.prox.fecha)+' · '+money(r.prox.monto):'—'}</span></div>
+  </button>`}).join('')}</div>`
+  :`<div class="panel empty"><h3>${Object.keys(S.cli).length?'Ningún cliente coincide':'Aún no hay fichas de clientes'}</h3><p>Cada ficha reúne los datos del cliente, sus compras, el plan de cuotas y todos sus abonos.</p><button class="btn-gold" data-act="new-cli">+ Crear la primera ficha</button></div>`}`;
+}
+
+function vVentas(){
+  let vs=Object.values(S.ven).sort((a,b)=>(b.fecha||'').localeCompare(a.fecha||'')||(b.numero||'').localeCompare(a.numero||''));
+  const f=UI.venFiltro;
+  if(f!=='todas')vs=vs.filter(v=>{const p=plan(v);return f==='abiertas'?p.saldo>0.005:f==='atrasadas'?p.estado==='atrasada':p.saldo<=0.005});
+  return `
+  <div class="head"><div><div class="eyebrow">Ventas, planes y abonos</div><h2>Ventas y cobros</h2></div>
+    <div class="tools"><button class="btn-gold" data-act="new-venta">+ Nueva venta</button></div></div>
+  <div class="tools" style="margin-bottom:12px"><div class="seg">${['abiertas','atrasadas','pagadas','todas'].map(x=>`<button data-act="ven-f" data-f="${x}" aria-pressed="${f===x}">${{abiertas:'Con saldo',atrasadas:'Atrasadas',pagadas:'Pagadas',todas:'Todas'}[x]}</button>`).join('')}</div></div>
+  ${vs.length?`<div class="panel scroll"><table><thead><tr><th>Venta</th><th>Fecha</th><th>Cliente</th><th>Plan</th><th class="r">Total</th><th class="r">Pagado</th><th class="r">Saldo</th><th>Próxima</th><th>Estado</th><th></th></tr></thead><tbody>
+  ${vs.map(v=>{const p=plan(v),cl=S.cli[v.clienteId];return `<tr>
+    <td class="code">${esc(v.numero)}</td><td class="num">${fdate(v.fecha)}</td>
+    <td><button class="btn-ghost btn-sm" style="border:0;padding:0;font-weight:600;text-decoration:underline;text-underline-offset:3px" data-act="ficha" data-id="${v.clienteId}">${esc(cl?cl.nombre:'—')}</button></td>
+    <td>${v.modalidad==='contado'?'Contado':`${v.cuotas} cuotas ${freqTxt(v.frecuencia)}`}</td>
+    <td class="r">${money(v.total)}</td><td class="r">${money(p.pagado)}</td><td class="r"><b>${money(p.saldo)}</b></td>
+    <td class="num">${p.prox?fdate(p.prox.fecha):'—'}</td><td>${chipEstado(p.estado)}</td>
+    <td>${p.saldo>0.005?`<button class="btn-sm" data-act="abono" data-id="${v.id}">Abonar</button>`:''}</td></tr>`}).join('')}
+  </tbody></table></div>`
+  :`<div class="panel empty"><h3>${Object.keys(S.ven).length?'No hay ventas en este filtro':'Aún no hay ventas'}</h3><p>Una venta toma piezas del inventario, fija su precio de contado o de crédito y arma el plan de cuotas del cliente.</p><button class="btn-gold" data-act="new-venta">+ Registrar la primera venta</button></div>`}`;
+}
+const freqTxt=f=>({semanal:'semanales',quincenal:'quincenales',mensual:'mensuales'}[f]||f);
+
+function vTarifa(){
+  const t=T(), h=(t.historial||[]).slice().reverse();
+  const disp=Object.values(S.art).filter(a=>a.estado!=='vendido');
+  return `
+  <div class="head"><div><div class="eyebrow">Un solo registro para todo el inventario</div><h2>Precio del oro</h2></div></div>
+  <div class="tarifa-box">
+    <form class="panel" data-form="tarifa">
+      <div class="grid g2">
+        <label class="f">Precio oro 18K por gramo (USD) <input id="tOro" name="oro" type="number" step="0.01" min="0.01" inputmode="decimal" value="${t.oro||''}" required></label>
+        <label class="f">Fecha de actualización <input id="tFecha" name="fecha" type="date" value="${today()}"></label>
+        <label class="f">Margen comercial (%) <small>Sobre costo de oro + hechura</small><input id="tMargen" name="margen" type="number" step="0.1" min="0" inputmode="decimal" value="${t.margen??35}" required></label>
+        <label class="f">Recargo por crédito (%) <small>Sobre el precio de contado</small><input id="tRecargo" name="recargo" type="number" step="0.1" min="0" inputmode="decimal" value="${t.recargo??0}" required></label>
+        <label class="f" style="grid-column:1/-1">Tasa del día (Bs. por USD) <small>Para mostrar equivalentes en bolívares</small><input id="tTasa" name="tasa" type="number" step="0.0001" min="0" inputmode="decimal" value="${t.tasa||''}"></label>
+      </div>
+      ${!(+t.recargo>0)?'<p class="warnline">El recargo por crédito está en 0 %: hoy el precio a crédito es igual al de contado.</p>':''}
+      <div class="conv">
+        <div class="eyebrow" style="color:var(--muted)">Calcular desde la cotización internacional</div>
+        <div class="row">
+          <label class="f">Onza troy oro 24K (USD) <input id="cOnza" type="number" step="0.01" min="0" inputmode="decimal" placeholder="Ej. 3.900,00"></label>
+          <label class="f">Prima local o descuento (%) <input id="cPrima" type="number" step="0.1" inputmode="decimal" value="0"></label>
+        </div>
+        <div id="cRes" class="hint">Escribe el precio de la onza para ver el gramo 24K y el gramo 18K (75 % de pureza).</div>
+        <div class="tools"><button type="button" class="btn-sm" data-act="usar-conv" id="cUsar" disabled>Usar como precio 18K</button></div>
+        <div class="links"><a href="https://www.kitco.com/charts/gold" target="_blank" rel="noopener">Cotización oro · Kitco</a><a href="https://www.lbma.org.uk/prices-and-data/precious-metal-prices" target="_blank" rel="noopener">Precio oficial LBMA</a><a href="https://www.bcv.org.ve/" target="_blank" rel="noopener">Tasa oficial · BCV</a></div>
+      </div>
+      <div class="ratecard" id="tPrev"></div>
+      <p class="hint">Al guardar, los precios de las ${disp.length} piezas disponibles (${grams(sum(disp.map(a=>a.peso)))}) se recalculan. Las ventas ya hechas conservan el precio pactado.</p>
+      <div style="display:flex;justify-content:flex-end"><button class="btn-gold" type="submit">Guardar precio del oro</button></div>
+    </form>
+    <div class="panel"><h3 style="font-size:20px;margin-bottom:10px">Historial de precios</h3>
+      ${h.length?`<div class="scroll"><table class="mini"><thead><tr><th>Fecha</th><th class="r">Oro/g</th><th class="r">Margen</th><th class="r">Crédito</th><th class="r">Tasa</th></tr></thead><tbody>
+      ${h.map(x=>`<tr><td class="num">${fdate(x.fecha)}</td><td class="r">$ ${fmt(x.oro)}</td><td class="r">${pct(x.margen)}</td><td class="r">+${pct(x.recargo)}</td><td class="r">${x.tasa?fmt(x.tasa):'—'}</td></tr>`).join('')}</tbody></table></div>`
+      :'<p class="hint">Cada vez que guardes el precio del oro queda registrado aquí con su fecha.</p>'}
+      <div style="margin-top:22px;padding-top:16px;border-top:1px solid var(--line)">
+        <h3 style="font-size:20px;margin-bottom:6px">Logo</h3>
+        <p class="hint">Sube el logo en PNG (fondo transparente) o JPG. Se usa en la cabecera, la pantalla de acceso y los estados de cuenta.</p>
+        <div class="tools"><label class="btn" style="display:inline-block">${S.marca&&S.marca.logo?'Cambiar logo':'Subir logo'}<input id="logoFile" type="file" accept="image/png,image/jpeg,image/webp" hidden></label>${S.marca&&S.marca.logo?'<button class="btn-ghost" data-act="logo-reset">Usar logo original</button>':''}</div>
+      </div>
+      <div style="margin-top:22px;padding-top:16px;border-top:1px solid var(--line)">
+        <h3 style="font-size:20px;margin-bottom:6px">Clave de acceso</h3>
+        ${S.acc?`<form data-form="clave" class="grid" style="gap:10px">
+          <label class="f">Clave actual <input id="kAct" name="actual" type="password" autocomplete="current-password" required></label>
+          <label class="f">Nueva clave <input id="kNueva" name="nueva" type="password" autocomplete="new-password" minlength="4" required></label>
+          <label class="f">Repite la nueva clave <input id="kRep" name="rep" type="password" autocomplete="new-password" minlength="4" required></label>
+          <div><button type="submit">Cambiar clave</button></div></form>`:'<p class="hint">Aún no hay clave. Se pide al abrir la app.</p>'}
+      </div>
+      <div style="margin-top:22px;padding-top:16px;border-top:1px solid var(--line)">
+        <h3 style="font-size:20px;margin-bottom:6px">Respaldo de datos</h3>
+        <p class="hint">Descarga una copia completa (inventario, fotos, clientes, ventas y abonos) o restaura una copia anterior.</p>
+        <div class="tools"><button data-act="backup">Descargar respaldo</button><label class="btn" style="display:inline-block">Restaurar respaldo<input id="restoreFile" type="file" accept=".json,application/json" hidden></label></div>
+      </div>
+    </div>
+  </div>`;
+}
+function tarifaPreview(){
+  const box=document.getElementById('tPrev');if(!box)return;
+  const oro=+document.getElementById('tOro').value||0,m=+document.getElementById('tMargen').value||0,rc=+document.getElementById('tRecargo').value||0,tasa=+document.getElementById('tTasa').value||0;
+  const disp=Object.values(S.art).filter(a=>a.estado!=='vendido');
+  const cost=sum(disp.map(a=>(+a.peso||0)*oro+(+a.hechura||0))), co=r2(cost*(1+m/100)), cr=r2(co*(1+rc/100));
+  const b=n=>tasa>0?`<div class="hint">Bs. ${fmt(n*tasa)}</div>`:'';
+  box.innerHTML=`<div><div class="eyebrow">Costo inventario</div><div class="v">${money(cost)}</div>${b(cost)}</div>
+  <div><div class="eyebrow">Valor contado</div><div class="v">${money(co)}</div>${b(co)}</div>
+  <div><div class="eyebrow">Valor crédito</div><div class="v">${money(cr)}</div>${b(cr)}</div>`;
+}
+function convPreview(){
+  const oz=+document.getElementById('cOnza').value||0,pr=+document.getElementById('cPrima').value||0,res=document.getElementById('cRes'),btn=document.getElementById('cUsar');
+  if(!oz){res.textContent='Escribe el precio de la onza para ver el gramo 24K y el gramo 18K (75 % de pureza).';btn.disabled=true;return}
+  const g24=oz/OZ, g18=r2(g24*0.75*(1+pr/100));
+  res.innerHTML=`Gramo 24K: <b class="num">${money(g24)}</b> · Gramo 18K${pr?` con ${pct(pr)}`:''}: <b class="num">${money(g18)}</b>`;
+  btn.disabled=false;btn.dataset.v=g18.toFixed(2);
+}
+
+/* ============ Modales ============ */
+let OPEN_FICHA=null;
+/* ============ Fotos ============ */
+const FOTO={}; let AF=null; // AF: estado de la foto en el formulario abierto
+const thumbHtml=(a,sm)=>a&&a.thumb?`<img class="th${sm?' sm':''}" src="${a.thumb}" alt="Foto de ${esc(a.descripcion)}" data-act="foto" data-id="${a.id}">`:`<span class="th-ph${sm?' sm':''}" aria-hidden="true">${esc(((a&&a.tipo)||'·').charAt(0))}</span>`;
+function loadImg(file){return new Promise((res,rej)=>{const u=URL.createObjectURL(file),i=new Image();i.onload=()=>res(i);i.onerror=()=>rej(new Error('img'));i.src=u})}
+function toJpeg(img,max,q){const w=img.naturalWidth,h=img.naturalHeight,k=Math.min(1,max/Math.max(w,h));const c=document.createElement('canvas');c.width=Math.max(1,Math.round(w*k));c.height=Math.max(1,Math.round(h*k));const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(img,0,0,c.width,c.height);return c.toDataURL('image/jpeg',q)}
+async function procesarImagen(file){
+  const img=await loadImg(file); let max=1100,q=.82,full=toJpeg(img,max,q);
+  while(full.length>200000&&(q>.5||max>600)){if(q>.5)q-=.08;else max-=150;full=toJpeg(img,max,q)}
+  return {full,thumb:toJpeg(img,180,.72)}}
+const IDB_NAME='aure-fotos';
+function idb(){return new Promise((res,rej)=>{const r=indexedDB.open(IDB_NAME,1);r.onupgradeneeded=()=>r.result.createObjectStore('fotos');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}
+async function idbDo(mode,fn){const db=await idb();return new Promise((res,rej)=>{const tx=db.transaction('fotos',mode),st=tx.objectStore('fotos');const q=fn(st);tx.oncomplete=()=>res(q&&q.result);tx.onerror=()=>rej(tx.error)})}
+async function putFoto(id,data){FOTO[id]=data;
+  try{await idbDo('readwrite',st=>st.put(data,id));return true}catch(e){toast('No se pudo guardar la foto en el teléfono.');return false}}
+async function delFoto(id){delete FOTO[id];try{await idbDo('readwrite',st=>st.delete(id))}catch(e){}}
+async function getFoto(id){if(FOTO[id])return FOTO[id];
+  try{const v=await idbDo('readonly',st=>st.get(id));if(v){FOTO[id]=v;return v}}catch(e){}
+  return null}
+async function verFoto(id){const a=S.art[id];if(!a)return;const back=OPEN_FICHA;
+  openModal(`${mh(esc(a.descripcion),esc(a.codigo)+' · '+grams(a.peso))}<div class="mb"><div class="lightbox"><img id="lbImg" src="${a.thumb}" alt="Foto de ${esc(a.descripcion)}"></div></div>`,'foto',true);
+  OPEN_FICHA=back;const f=await getFoto(id);const i=document.getElementById('lbImg');if(f&&i)i.src=f}
+function fotoField(a){return `<div class="photo-field">
+  <div class="ph" id="aPh">${a.thumb?`<img id="aPhImg" src="${a.thumb}" alt="Foto de la pieza">`:'Sin foto'}</div>
+  <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-start">
+    <span class="eyebrow" style="color:var(--muted)">Foto del producto</span>
+    <div class="tools"><label class="btn btn-sm" id="aFotoBtn">${a.thumb?'Cambiar foto':'Adjuntar foto'}<input id="aFoto" type="file" accept="image/jpeg,image/png,image/webp,image/*" hidden></label>
+    <button type="button" class="btn-sm btn-ghost" data-act="foto-quitar" id="aFotoQuitar" ${a.thumb?'':'hidden'}>Quitar</button></div>
+    <p class="hint" style="margin:0">JPG, PNG o WEBP. Se reduce automáticamente para que cargue rápido.</p></div></div>`}
+function fotoPaint(){const ph=document.getElementById('aPh');if(!ph||!AF)return;
+  ph.innerHTML=AF.busy?'Procesando…':(AF.thumb?`<img id="aPhImg" src="${AF.full||AF.thumb}" alt="Foto de la pieza">`:'Sin foto');
+  const b=document.getElementById('aFotoBtn');if(b)b.firstChild.textContent=AF.thumb?'Cambiar foto':'Adjuntar foto';
+  const q=document.getElementById('aFotoQuitar');if(q)q.hidden=!AF.thumb}
+function openModal(html,kind='',wide=false){const r=document.getElementById('modalRoot');r.dataset.kind=kind;
+  r.innerHTML=`<div class="ov" data-act="ov"><div class="modal ${wide?'wide':''}" role="dialog" aria-modal="true">${html}</div></div>`;
+  const f=r.querySelector('input:not([type=checkbox]):not([type=search]),select');if(f&&!wide)setTimeout(()=>f.focus(),30)}
+function closeModal(){const r=document.getElementById('modalRoot');r.innerHTML='';r.dataset.kind='';OPEN_FICHA=null;AF=null}
+const mh=(t,e)=>`<div class="mh"><div>${e?`<div class="eyebrow">${e}</div>`:''}<h3>${t}</h3></div><button class="xbtn" type="button" data-act="close" aria-label="Cerrar">×</button></div>`;
+
+function formArt(id){
+  const a=id?S.art[id]:{peso:'',hechura:'',tipo:'Cadenas',fechaCompra:today()}; const sold=a.estado==='vendido';
+  openModal(`<form data-form="art" data-id="${id||''}">${mh(id?esc(a.descripcion):'Registrar compra',id?esc(a.codigo)+' · Oro 18K':'Nueva pieza · Oro 18K')}
+  <div class="mb">
+    ${fotoField(a)}
+    <div class="grid g2">
+      <label class="f" style="grid-column:1/-1">Nombre de la pieza <input id="aDesc" name="descripcion" required maxlength="120" placeholder="Ej. Gargantilla Punto de Luz Bisel" value="${esc(a.descripcion)}"></label>
+      <label class="f">Categoría <select id="aTipo" name="tipo">${[...new Set([...CATS,a.tipo].filter(Boolean))].map(x=>`<option ${a.tipo===x?'selected':''}>${esc(x)}</option>`).join('')}</select></label>
+      <label class="f">Código <input id="aCod" value="${esc(id?a.codigo:codeArt(a.tipo))}" readonly title="Se asigna automáticamente"></label>
+      <label class="f" style="grid-column:1/-1">Acabado / cierre <input id="aAcab" name="acabado" maxlength="100" placeholder="Ej. Oro Amarillo 18K & Circonia fina" value="${esc(a.acabado)}"></label>
+      <label class="f">Peso en gramos <input id="aPeso" name="peso" type="number" step="0.01" min="0.01" inputmode="decimal" required value="${a.peso}" ${sold?'readonly':''}></label>
+      <label class="f">Hechura / merma (USD) <input id="aHech" name="hechura" type="number" step="0.01" min="0" inputmode="decimal" value="${a.hechura??''}" ${sold?'readonly':''}></label>
+      <label class="f">Proveedor <input id="aProv" name="proveedor" maxlength="80" value="${esc(a.proveedor)}"></label>
+      <label class="f">Fecha de compra <input id="aFecha" name="fechaCompra" type="date" value="${a.fechaCompra||today()}"></label>
+      <label class="f" style="grid-column:1/-1">Lote / factura <small>Agrupa las piezas de una misma compra para ajustarlas al monto pagado</small><input id="aLote" name="lote" maxlength="80" list="lotesList" value="${esc(a.lote)}"><datalist id="lotesList">${[...new Set(Object.values(S.art).map(x=>x.lote).filter(Boolean))].map(l=>`<option value="${esc(l)}">`).join('')}</datalist></label>
+      <label class="f" style="grid-column:1/-1">Costo real pagado (USD) <small>Opcional, para calcular tu utilidad real. Si lo dejas vacío se usa peso × oro/g + hechura.</small><input id="aCostoReal" name="costoReal" type="number" step="0.01" min="0" inputmode="decimal" value="${+a.costoReal>0?a.costoReal:''}"></label>
+      <label class="f" style="grid-column:1/-1">Notas <textarea id="aNotas" name="notas" maxlength="400">${esc(a.notas)}</textarea></label>
+    </div>
+    <div class="preview" id="aPrev"></div>
+    ${!S.tarifa?'<p class="hint">Aún no hay precio del oro. Fíjalo en la pestaña Precio del oro para ver los precios.</p>':''}
+  </div>
+  <div class="mf">${id&&!sold?`<button type="button" class="btn-danger btn-ghost" data-act="del-art" data-id="${id}">Eliminar pieza</button>`:''}<span style="flex:1"></span>
+    <button type="button" data-act="close">Cancelar</button><button class="btn-gold" type="submit">${id?'Guardar cambios':'Registrar compra'}</button></div></form>`);
+  artPreview();
+  AF={thumb:a.thumb||'',full:null,changed:false,busy:false};
+  if(id&&a.thumb)getFoto(id).then(f=>{if(f&&AF&&!AF.changed){AF.full=f;fotoPaint()}});
+}
+function artPreview(){const b=document.getElementById('aPrev');if(!b)return;
+  const a={peso:+document.getElementById('aPeso').value||0,hechura:+document.getElementById('aHech').value||0,costoReal:+document.getElementById('aCostoReal').value||0};
+  const h=n=>bs(1)?`<div class="hint">${bs(n)}</div>`:'';
+  b.innerHTML=`<div><div class="l">Costo</div><div class="v">${money(costoArt(a))}</div>${h(costoArt(a))}</div><div><div class="l">Contado</div><div class="v">${money(pContado(a))}</div>${h(pContado(a))}</div><div><div class="l">Crédito</div><div class="v">${money(pCredito(a))}</div>${h(pCredito(a))}</div>`}
+
+function formCli(id,afterVenta){
+  const c=id?S.cli[id]:{};
+  openModal(`<form data-form="cli" data-id="${id||''}" data-after="${afterVenta?1:''}">${mh(id?'Editar ficha':'Nueva ficha de cliente','Cliente')}
+  <div class="mb"><div class="grid g2">
+    <label class="f" style="grid-column:1/-1">Nombre y apellido <input id="cNom" name="nombre" required maxlength="100" value="${esc(c.nombre)}"></label>
+    <label class="f">Cédula <input id="cCed" name="cedula" maxlength="20" value="${esc(c.cedula)}"></label>
+    <label class="f">Teléfono / WhatsApp <input id="cTel" name="telefono" maxlength="30" inputmode="tel" value="${esc(c.telefono)}"></label>
+    <label class="f" style="grid-column:1/-1">Dirección <input id="cDir" name="direccion" maxlength="160" value="${esc(c.direccion)}"></label>
+    <label class="f" style="grid-column:1/-1">Referencia o quién la recomendó <input id="cRef" name="referencia" maxlength="120" value="${esc(c.referencia)}"></label>
+    <label class="f" style="grid-column:1/-1">Notas <textarea id="cNotas" name="notas" maxlength="400">${esc(c.notas)}</textarea></label>
+  </div></div>
+  <div class="mf">${id&&!ventasDe(id).length?`<button type="button" class="btn-danger btn-ghost" data-act="del-cli" data-id="${id}">Eliminar ficha</button>`:''}<span style="flex:1"></span>
+    <button type="button" data-act="close">Cancelar</button><button class="btn-gold" type="submit">Guardar ficha</button></div></form>`);
+}
+
+let VF=null; // estado del formulario de venta
+function formVenta(clienteId){
+  const disp=Object.values(S.art).filter(a=>a.estado!=='vendido').sort((a,b)=>(a.codigo||'').localeCompare(b.codigo||''));
+  const cs=Object.values(S.cli).sort((a,b)=>(a.nombre||'').localeCompare(b.nombre||''));
+  if(!S.tarifa){toast('Primero fija el precio del oro.');TAB='tarifa';render();return}
+  if(!disp.length){toast('No hay piezas disponibles. Registra una compra primero.');return}
+  VF={sel:new Set(),modalidad:'credito',totalManual:false,q:''};
+  openModal(`<form data-form="venta">${mh('Nueva venta','Ventas')}
+  <div class="mb">
+    <div class="grid g2">
+      <label class="f">Cliente <select id="vCli" name="clienteId" required><option value="">Selecciona…</option>${cs.map(c=>`<option value="${c.id}" ${c.id===clienteId?'selected':''}>${esc(c.nombre)}</option>`).join('')}</select></label>
+      <label class="f">Fecha de venta <input id="vFecha" name="fecha" type="date" value="${today()}" required></label>
+    </div>
+    <div class="tools" style="justify-content:space-between"><button type="button" class="btn-sm btn-ghost" data-act="new-cli-v">+ Cliente nuevo</button>
+      <div class="seg"><button type="button" data-act="v-mod" data-m="credito" aria-pressed="true">A crédito</button><button type="button" data-act="v-mod" data-m="contado" aria-pressed="false">De contado</button></div></div>
+    <div><input id="vQ" type="search" placeholder="Buscar pieza disponible" style="margin-bottom:8px">
+    <div class="picklist" id="vPick">${disp.map(a=>`<label class="pick" data-q="${esc((a.codigo+' '+a.descripcion+' '+a.tipo).toLowerCase())}"><input type="checkbox" value="${a.id}" data-act="v-pick">${thumbHtml(a,1).replace('data-act="foto"','')}<span class="d"><span class="code">${esc(a.codigo)}</span> ${esc(a.descripcion)}<div class="hint">${grams(a.peso)}</div></span><span class="p" data-pc="${pContado(a)}" data-pr="${pCredito(a)}">${money(pCredito(a))}</span></label>`).join('')}</div></div>
+    <div class="sumbar" id="vSum"></div>
+    <div class="grid g4" id="vPlan">
+      <label class="f">Total pactado <input id="vTotal" name="total" type="number" step="0.01" min="0" inputmode="decimal"></label>
+      <label class="f">Inicial <input id="vIni" name="inicial" type="number" step="0.01" min="0" inputmode="decimal" value="0"></label>
+      <label class="f">N.º de cuotas <input id="vCuotas" name="cuotas" type="number" min="1" max="60" step="1" value="4"></label>
+      <label class="f">Frecuencia <select id="vFreq" name="frecuencia"><option value="semanal">Semanal</option><option value="quincenal" selected>Quincenal</option><option value="mensual">Mensual</option></select></label>
+    </div>
+    <div id="vCuotasPrev"></div>
+    <label class="f">Notas de la venta <textarea id="vNotas" name="notas" maxlength="300"></textarea></label>
+  </div>
+  <div class="mf"><button type="button" data-act="close">Cancelar</button><button class="btn-gold" type="submit">Registrar venta</button></div></form>`,'venta',true);
+  ventaRecalc();
+}
+function ventaItems(){return [...VF.sel].map(id=>S.art[id]).filter(Boolean)}
+function ventaRecalc(){
+  if(!VF)return; const items=ventaItems(), credito=VF.modalidad==='credito';
+  document.querySelectorAll('#vPick .p').forEach(p=>p.textContent=money(+p.dataset[credito?'pr':'pc']));
+  const sub=sum(items.map(credito?pCredito:pContado)), g=sum(items.map(a=>a.peso)), cost=sum(items.map(costoArt));
+  const tI=document.getElementById('vTotal'); if(!VF.totalManual)tI.value=sub?sub.toFixed(2):'';
+  const total=+tI.value||0;
+  document.getElementById('vSum').innerHTML=`<span>${items.length} ${items.length===1?'pieza':'piezas'}</span><span>${grams(g)}</span><span>Precio ${credito?'crédito':'contado'}: <b>${money(sub)}</b></span>${total&&total!==sub?`<span>Ajuste: <b>${money(total-sub)}</b></span>`:''}<span>Utilidad: <b>${money(total-cost)}</b></span>`;
+  ['vCuotas','vFreq','vIni'].forEach(i=>document.getElementById(i).closest('label').hidden=!credito);
+  const box=document.getElementById('vCuotasPrev');
+  if(!credito||!total){box.innerHTML='';return}
+  const v={modalidad:'credito',total,inicial:+document.getElementById('vIni').value||0,cuotas:+document.getElementById('vCuotas').value||1,frecuencia:document.getElementById('vFreq').value,fecha:document.getElementById('vFecha').value,abonos:[]};
+  if(v.inicial>total){box.innerHTML='<p class="hint" style="color:var(--bad)">La inicial no puede superar el total.</p>';return}
+  const p=plan(v);
+  box.innerHTML=`<div class="hint" style="margin-bottom:6px">Plan: ${p.cuotas.length} cuotas ${freqTxt(v.frecuencia)} de ${money(p.cuotas[0]?p.cuotas[0].monto:0)} · financiado ${money(total-v.inicial)}</div>
+  <div class="scroll"><table class="mini panel"><thead><tr><th>Cuota</th><th>Vence</th><th class="r">Monto</th></tr></thead><tbody>${p.cuotas.map(c=>`<tr><td>${c.k}</td><td class="num">${fdate(c.fecha)}</td><td class="r">${money(c.monto)}</td></tr>`).join('')}</tbody></table></div>`;
+}
+
+function formAbono(vid){
+  const v=S.ven[vid];if(!v)return;const p=plan(v),cl=S.cli[v.clienteId];
+  openModal(`<form data-form="abono" data-id="${vid}">${mh('Registrar abono',esc(v.numero)+' · '+esc(cl?cl.nombre:''))}
+  <div class="mb">
+    <div class="sumbar"><span>Total ${money(v.total)}</span><span>Pagado ${money(p.pagado)}</span><span>Saldo <b>${money(p.saldo)}</b></span>${p.vencido>0?`<span style="color:var(--bad)">Vencido <b>${money(p.vencido)}</b></span>`:''}</div>
+    <div class="grid g2">
+      <label class="f">Monto (USD) <input id="abMonto" name="monto" type="number" step="0.01" min="0.01" max="${p.saldo}" inputmode="decimal" required value="${p.prox?Math.min(p.prox.monto,p.saldo).toFixed(2):p.saldo.toFixed(2)}"><small id="abBs">${bs(p.prox?Math.min(p.prox.monto,p.saldo):p.saldo)}</small></label>
+      <label class="f">Fecha <input id="abFecha" name="fecha" type="date" value="${today()}" required></label>
+      <label class="f">Forma de pago <select id="abMetodo" name="metodo">${['Efectivo divisas','Zelle','Pago móvil','Transferencia Bs.','Binance / USDT','Efectivo Bs.','Otro'].map(x=>`<option>${x}</option>`).join('')}</select></label>
+      <label class="f">Referencia <input id="abRef" name="ref" maxlength="60"></label>
+    </div>
+  </div>
+  <div class="mf"><button type="button" data-act="close">Cancelar</button><button class="btn-gold" type="submit">Guardar abono</button></div></form>`);
+}
+
+function openFicha(cid,refresh){
+  const c=S.cli[cid];if(!c)return;OPEN_FICHA=cid;const r=resumenCliente(cid);
+  const scrollY=refresh?(document.querySelector('#modalRoot .ov')||{}).scrollTop:0;
+  const ventasHtml=r.vs.map(v=>{const p=plan(v);return `<div class="venta">
+    <div class="vh"><div><span class="code">${esc(v.numero)}</span> · <span class="num">${fdate(v.fecha)}</span> · ${v.modalidad==='contado'?'Contado':`${v.cuotas} cuotas ${freqTxt(v.frecuencia)}`}</div><div>${chipEstado(p.estado)}</div></div>
+    <div class="vb">
+      <div class="scroll"><table class="mini"><thead><tr><th>Pieza</th><th class="r">Peso</th><th class="r">Precio</th></tr></thead><tbody>${v.items.map(i=>`<tr><td><div class="pz">${thumbHtml(S.art[i.id]||{tipo:''},1)}<div><span class="code">${esc(i.codigo)}</span> ${esc(i.descripcion)}</div></div></td><td class="r">${grams(i.peso)}</td><td class="r">${money(i.precio)}</td></tr>`).join('')}
+      ${Math.abs(v.total-v.subtotal)>0.005?`<tr><td colspan="2">Ajuste pactado</td><td class="r">${money(v.total-v.subtotal)}</td></tr>`:''}</tbody></table></div>
+      <div class="sumbar"><span>Total <b>${money(v.total)}</b></span><span>Inicial <b>${money(v.inicial)}</b></span><span>Abonos <b>${money(p.ab)}</b></span><span>Saldo <b>${money(p.saldo)}</b></span>${p.vencido>0?`<span style="color:var(--bad)">Vencido <b>${money(p.vencido)}</b></span>`:''}</div>
+      ${p.cuotas.length?`<div class="scroll"><table class="mini"><thead><tr><th>Cuota</th><th>Vence</th><th class="r">Monto</th><th class="r">Pagado</th><th>Estado</th></tr></thead><tbody>${p.cuotas.map(q=>`<tr><td>${q.k}/${p.cuotas.length}</td><td class="num">${fdate(q.fecha)}</td><td class="r">${money(q.monto)}</td><td class="r">${money(q.pag)}</td><td>${q.st==='pendiente'&&q.pag>0?'<span class="chip c-warn">Parcial</span>':chipEstado(q.st)||'<span class="chip c-n">Pendiente</span>'}</td></tr>`).join('')}</tbody></table></div>`:''}
+      ${(v.abonos||[]).length?`<div><div class="eyebrow" style="margin-bottom:4px">Abonos recibidos</div><div class="scroll"><table class="mini"><tbody>${v.abonos.slice().sort((a,b)=>a.fecha.localeCompare(b.fecha)).map(a=>`<tr><td class="num">${fdate(a.fecha)}</td><td>${esc(a.metodo)}${a.ref?' · '+esc(a.ref):''}</td><td class="r">${money(a.monto)}</td><td style="width:1%"><button class="btn-sm btn-ghost btn-danger" data-act="del-abono" data-v="${v.id}" data-id="${a.id}">Quitar</button></td></tr>`).join('')}</tbody></table></div></div>`:''}
+      ${v.notas?`<p class="hint" style="margin:0">${esc(v.notas)}</p>`:''}
+      <div class="tools">${p.saldo>0.005?`<button class="btn-sm btn-gold" data-act="abono" data-id="${v.id}">Registrar abono</button>`:''}<span style="flex:1"></span><button class="btn-sm btn-ghost btn-danger" data-act="del-venta" data-id="${v.id}">Anular venta</button></div>
+    </div></div>`}).join('');
+  openModal(`${mh(esc(c.nombre),'Ficha de cliente')}
+  <div class="mb">
+    <div class="grid g3 mini">
+      <div><div class="eyebrow">Cédula</div>${esc(c.cedula)||'<span class="muted">Sin datos</span>'}</div>
+      <div><div class="eyebrow">Teléfono</div>${esc(c.telefono)||'<span class="muted">Sin datos</span>'}</div>
+      <div><div class="eyebrow">Referencia</div>${esc(c.referencia)||'<span class="muted">—</span>'}</div>
+      ${c.direccion?`<div style="grid-column:1/-1"><div class="eyebrow">Dirección</div>${esc(c.direccion)}</div>`:''}
+      ${c.notas?`<div style="grid-column:1/-1"><div class="eyebrow">Notas</div>${esc(c.notas)}</div>`:''}
+    </div>
+    <div class="kpis k3">
+      <div class="kpi"><div class="l">Compras</div><div class="v">${money(r.total)}</div></div>
+      <div class="kpi"><div class="l">Saldo</div><div class="v">${money(r.saldo)}</div></div>
+      <div class="kpi ${r.venc>0.005?'alert':''}"><div class="l">Vencido</div><div class="v">${money(r.venc)}</div></div>
+    </div>
+    <div class="tools"><button class="btn-gold btn-sm" data-act="new-venta-c" data-id="${cid}">+ Nueva venta</button><button class="btn-sm" data-act="edit-cli" data-id="${cid}">Editar datos</button>
+      ${r.vs.length?`<button class="btn-sm" data-act="copy-edo" data-id="${cid}">Copiar estado de cuenta</button><button class="btn-sm btn-gold" data-act="pdf-share" data-id="${cid}">Enviar estado de cuenta (PDF)</button>`:''}</div>
+    ${r.vs.length?ventasHtml:'<div class="empty" style="padding:18px"><p>Este cliente todavía no tiene compras.</p></div>'}
+  </div>`,'ficha',true);
+  OPEN_FICHA=cid;
+  if(refresh&&scrollY){const o=document.querySelector('#modalRoot .ov');if(o)o.scrollTop=scrollY}
+}
+
+/* ============ Ajuste de inversión a factura ============ */
+function facturaSel(){const el=document.getElementById('fLote');const l=el?el.value:'';return Object.values(S.art).filter(a=>a.estado!=='vendido'&&(!l||a.lote===l)).sort((a,b)=>(a.codigo||'').localeCompare(b.codigo||''))}
+function formFactura(){
+  const disp=Object.values(S.art).filter(a=>a.estado!=='vendido');
+  const lotes=[...new Set(disp.map(a=>a.lote).filter(Boolean))];
+  openModal(`<form data-form="factura">${mh('Ajustar inversión a factura','Inventario')}
+  <div class="mb">
+    <p class="hint" style="margin:0">Reparte el monto realmente pagado entre las piezas, en proporción a su costo de referencia (peso × oro/g + hechura). Así la inversión y la utilidad reflejan lo que se pagó. Los precios de venta no cambian.</p>
+    <div class="grid g2">
+      <label class="f" style="grid-column:1/-1">Piezas <select id="fLote"><option value="">Todas las piezas disponibles (${disp.length})</option>${lotes.map(l=>`<option ${lotes.length===1?'selected':''} value="${esc(l)}">${esc(l)} (${disp.filter(a=>a.lote===l).length})</option>`).join('')}</select></label>
+      <label class="f">Monto pagado según factura (USD) <input id="fMonto" name="monto" type="number" step="0.01" min="0.01" inputmode="decimal" required></label>
+      <label class="f">Fecha de la factura <input id="fFecha" name="fecha" type="date" value="${today()}"></label>
+    </div>
+    <div id="fPrev"></div>
+  </div>
+  <div class="mf"><button type="button" class="btn-ghost btn-danger" data-act="factura-quitar">Quitar ajuste</button><span style="flex:1"></span><button type="button" data-act="close">Cancelar</button><button class="btn-gold" type="submit">Aplicar ajuste</button></div></form>`);
+  facturaPreview();
+}
+function facturaPreview(){
+  const box=document.getElementById('fPrev');if(!box)return;const sel=facturaSel();
+  const base=sum(sel.map(costoRef)),actual=sum(sel.map(costoArt)),monto=+document.getElementById('fMonto').value||0,co=sum(sel.map(pContado));
+  let h=`<div class="sumbar"><span>${sel.length} piezas</span><span>${grams(sum(sel.map(a=>a.peso)))}</span><span>Costo de referencia <b>${money(base)}</b></span><span>Inversión actual <b>${money(actual)}</b></span><span>Valor contado <b>${money(co)}</b></span></div>`;
+  if(monto>0&&base>0){const d=(monto/base-1)*100;
+    h+=`<p style="margin:10px 0 0">Con ${money(monto)}: <b>${d<0?'descuento de '+pct(-d):'recargo de '+pct(d)}</b> sobre el costo de referencia.</p>`;
+    if(co<monto)h+=`<p class="warnline" style="color:var(--bad);margin-top:6px">Ojo: vendiendo todo de contado al precio actual entrarían ${money(co)}, ${money(monto-co)} menos de lo pagado. Conviene subir el precio del oro por gramo o el margen.</p>`}
+  box.innerHTML=h;
+}
+
+/* ============ PDF para el cliente ============ */
+function postAccion(cid,o){
+  openModal(`${mh(o.titulo,o.eyebrow)}<div class="mb"><p style="margin:0">${o.texto}</p></div>
+  <div class="mf"><button type="button" data-act="post-ficha" data-id="${cid}">Ver ficha</button><button class="btn-gold" data-act="pdf-share" data-id="${cid}" data-venta="${o.venta||''}" data-abono="${o.abono||''}">${o.boton}</button></div>`,'post');
+  OPEN_FICHA=cid;
+}
+const pm=n=>'$ '+fmt(n);
+function pdfEstado(cid,opt){
+  opt=opt||{};const {jsPDF}=window.jspdf;const doc=new jsPDF({unit:'pt',format:'letter'});
+  const W=doc.internal.pageSize.getWidth(),H=doc.internal.pageSize.getHeight(),M=42;
+  const GOLD=[156,119,46],INK=[42,32,26],MUT=[118,102,90],LINE=[227,216,202],SUNK=[243,237,228];
+  const c=S.cli[cid],r=resumenCliente(cid);let y=40;
+  const hdr=()=>{
+    if(S.marca&&S.marca.logo){try{const pr=doc.getImageProperties(S.marca.logo);const h=46,w=Math.min(170,pr.width*h/pr.height);doc.addImage(S.marca.logo,M,y,w,h)}catch(e){}}
+    else{doc.setFont('times','normal');doc.setFontSize(26);doc.setTextColor(92,66,51);doc.text('A U R E',M,y+28);doc.setFont('helvetica','normal');doc.setFontSize(7);doc.setTextColor(...GOLD);doc.text('JOYERÍA FINA  ·  ORO 18K',M+2,y+42)}
+    doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(...GOLD);doc.text('ESTADO DE CUENTA',W-M,y+16,{align:'right'});
+    doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(...MUT);doc.text('Emitido el '+fdate(today()),W-M,y+30,{align:'right'});
+    y+=58;doc.setDrawColor(...GOLD);doc.setLineWidth(1);doc.line(M,y,W-M,y);y+=22};
+  hdr();
+  const need=h=>{if(y+h>H-60){doc.addPage();y=40;hdr()}};
+  doc.setFont('helvetica','bold');doc.setFontSize(14);doc.setTextColor(...INK);doc.text(c.nombre||'',M,y);y+=15;
+  doc.setFont('helvetica','normal');doc.setFontSize(9.5);doc.setTextColor(...MUT);
+  const datos=[c.cedula&&('C.I. '+c.cedula),c.telefono].filter(Boolean).join('   ·   ');if(datos){doc.text(datos,M,y);y+=14}
+  y+=6;
+  // abono destacado
+  if(opt.abono){const v=S.ven[opt.venta];const ab=v&&(v.abonos||[]).find(x=>x.id===opt.abono);
+    if(ab){const p=plan(v);doc.setFillColor(...SUNK);doc.roundedRect(M,y,W-2*M,46,4,4,'F');
+      doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(...GOLD);doc.text('ABONO RECIBIDO',M+12,y+16);
+      doc.setFont('helvetica','normal');doc.setFontSize(10.5);doc.setTextColor(...INK);
+      doc.text(`${fdate(ab.fecha)}  ·  ${pm(ab.monto)}  ·  ${ab.metodo}${ab.ref?'  ·  Ref. '+ab.ref:''}`,M+12,y+33);
+      doc.setFont('helvetica','bold');doc.text(p.saldo<=0.005?'Cuenta saldada':'Saldo: '+pm(p.saldo),W-M-12,y+33,{align:'right'});y+=62}}
+  // resumen
+  const cols=[['Total compras',pm(r.total)],['Pagado',pm(r.total-r.saldo)],['Saldo pendiente',pm(r.saldo)],['Próxima cuota',r.prox?fdate(r.prox.fecha)+' · '+pm(r.prox.monto):'—']];
+  const cw=(W-2*M)/4;doc.setDrawColor(...LINE);doc.setLineWidth(.6);doc.rect(M,y,W-2*M,44);
+  cols.forEach((k,i)=>{const x=M+i*cw;if(i)doc.line(x,y,x,y+44);doc.setFont('helvetica','bold');doc.setFontSize(7);doc.setTextColor(...MUT);doc.text(k[0].toUpperCase(),x+10,y+15);
+    doc.setFont('helvetica','bold');doc.setFontSize(i===2?12:10.5);doc.setTextColor(...(i===2?GOLD:INK));doc.text(k[1],x+10,y+33)});
+  y+=56;
+  if(r.venc>0.005){doc.setFont('helvetica','bold');doc.setFontSize(9.5);doc.setTextColor(158,59,51);doc.text('Monto vencido a la fecha: '+pm(r.venc),M,y);y+=16}
+  if(+T().tasa>0){doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.setTextColor(...MUT);doc.text(`Saldo equivalente a tasa del día (Bs. ${fmt(T().tasa)} por USD): Bs. ${fmt(r.saldo*T().tasa)}`,M,y);y+=16}
+  const tbl=(head,body,colStyles,extra)=>{extra=extra||{};const userParse=extra.didParseCell;
+    extra.didParseCell=d=>{if(d.section==='head'&&colStyles&&colStyles[d.column.index]&&colStyles[d.column.index].halign)d.cell.styles.halign=colStyles[d.column.index].halign;if(userParse)userParse(d)};
+    doc.autoTable(Object.assign({startY:y,head:[head],body,theme:'plain',margin:{left:M,right:M,top:110},
+    headStyles:{fillColor:SUNK,textColor:MUT,fontSize:7.5,fontStyle:'bold'},styles:{fontSize:9,cellPadding:5,textColor:INK,lineColor:LINE,lineWidth:{bottom:.5}},columnStyles:colStyles||{}},extra));y=doc.lastAutoTable.finalY+14};
+  const ventas=opt.venta?r.vs.filter(v=>v.id===opt.venta).concat(r.vs.filter(v=>v.id!==opt.venta&&plan(v).saldo>0.005)):r.vs;
+  ventas.forEach(v=>{const p=plan(v);need(120);y+=4;
+    doc.setFont('helvetica','bold');doc.setFontSize(11);doc.setTextColor(...INK);doc.text(`${v.numero}  ·  ${fdate(v.fecha)}`,M,y);
+    doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(...MUT);doc.text(v.modalidad==='contado'?'Contado':`${v.cuotas} cuotas ${freqTxt(v.frecuencia)}`,W-M,y,{align:'right'});y+=10;
+    const body=v.items.map(i=>[i.codigo,i.descripcion,grams(i.peso),pm(i.precio)]);
+    if(Math.abs(v.total-v.subtotal)>0.005)body.push(['','Ajuste pactado','',pm(v.total-v.subtotal)]);
+    tbl(['Código','Pieza','Peso','Precio'],body,{0:{cellWidth:78,textColor:GOLD,fontStyle:'bold'},2:{halign:'right',cellWidth:60},3:{halign:'right',cellWidth:80}});
+    need(30);doc.setFontSize(9.5);doc.setTextColor(...INK);
+    doc.text(`Total ${pm(v.total)}   ·   Inicial ${pm(v.inicial)}   ·   Abonos ${pm(p.ab)}`,M,y);doc.setFont('helvetica','bold');doc.text('Saldo '+pm(p.saldo),W-M,y,{align:'right'});doc.setFont('helvetica','normal');y+=12;
+    if(p.cuotas.length){
+      const est={pagada:'Pagada',vencida:'Vencida',pendiente:'Pendiente'};
+      tbl(['Cuota','Vence','Monto','Pagado','Estado'],p.cuotas.map(q=>[q.k+'/'+p.cuotas.length,fdate(q.fecha),pm(q.monto),pm(q.pag),q.st==='pendiente'&&q.pag>0?'Parcial':est[q.st]]),
+        {2:{halign:'right'},3:{halign:'right'},4:{fontStyle:'bold'}},
+        {didParseCell:d=>{if(d.section==='body'&&d.column.index===4){const t=d.cell.raw;d.cell.styles.textColor=t==='Pagada'?[60,115,80]:t==='Vencida'?[158,59,51]:t==='Parcial'?[154,101,22]:MUT}}})}
+    if((v.abonos||[]).length){
+      tbl(['Abono','Forma de pago','Referencia','Monto'],v.abonos.slice().sort((a,b)=>a.fecha.localeCompare(b.fecha)).map(a=>[fdate(a.fecha),a.metodo,a.ref||'—',pm(a.monto)]),{3:{halign:'right'}},
+        {didParseCell:d=>{if(d.section==='body'&&opt.abono&&v.abonos.slice().sort((a,b)=>a.fecha.localeCompare(b.fecha))[d.row.index].id===opt.abono)d.cell.styles.fontStyle='bold'}})}
+    y+=6});
+  const n=doc.internal.getNumberOfPages();
+  for(let i=1;i<=n;i++){doc.setPage(i);doc.setDrawColor(...LINE);doc.line(M,H-40,W-M,H-40);doc.setFont('helvetica','normal');doc.setFontSize(7.5);doc.setTextColor(...MUT);
+    doc.text('AURE  ·  Joyería fina & sentido  ·  Luz que se lleva puesta',M,H-26);doc.text(`Página ${i} de ${n}`,W-M,H-26,{align:'right'})}
+  return doc.output('blob');
+}
+async function compartirPDF(cid,opt){
+  if(!window.jspdf||!window.jspdf.jsPDF){toast('No se pudo cargar el generador de PDF. Revisa tu conexión a internet y vuelve a abrir la app.');return}
+  const c=S.cli[cid];if(!c)return;
+  let blob;try{blob=pdfEstado(cid,opt)}catch(e){console.error(e);toast('No se pudo generar el PDF.');return}
+  const name=`AURE-Estado-de-cuenta-${(c.nombre||'cliente').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^\w]+/g,'-')}-${today()}.pdf`;
+  const file=new File([blob],name,{type:'application/pdf'});
+  try{if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:'Estado de cuenta AURE',text:`Hola ${c.nombre.split(' ')[0]}, te envío tu estado de cuenta actualizado de AURE.`});return}}
+  catch(e){if(e&&e.name==='AbortError')return}
+  await save(name,blob);
+}
+
+/* ============ Estado de cuenta ============ */
+function edoTexto(cid){const c=S.cli[cid],r=resumenCliente(cid);
+  const L=[`AURE · Estado de cuenta`,`Cliente: ${c.nombre}`,`Fecha: ${fdate(today())}`,''];
+  r.vs.forEach(v=>{const p=plan(v);if(p.saldo<=0.005&&r.vs.length>1)return;
+    L.push(`${v.numero} (${fdate(v.fecha)}): ${v.items.map(i=>i.descripcion).join(', ')}`);
+    L.push(`Total ${money(v.total)} · Pagado ${money(p.pagado)} · Saldo ${money(p.saldo)}`);
+    if(p.vencido>0.005)L.push(`Vencido: ${money(p.vencido)}`);
+    if(p.prox)L.push(`Próxima cuota: ${fdate(p.prox.fecha)} · ${money(p.prox.monto)}`);L.push('')});
+  L.push(`Saldo total: ${money(r.saldo)}${bs(1)?` (${bs(r.saldo)} a tasa del día)`:''}`,'','Gracias por tu confianza. AURE · Luz que se lleva puesta');return L.join('\n')}
+function edoHTML(cid){const c=S.cli[cid],r=resumenCliente(cid);
+  const rows=r.vs.map(v=>{const p=plan(v);return `<h3>${esc(v.numero)} · ${fdate(v.fecha)} · ${v.modalidad==='contado'?'Contado':v.cuotas+' cuotas '+freqTxt(v.frecuencia)}</h3>
+  <table><tr><th>Pieza</th><th>Peso</th><th>Precio</th></tr>${v.items.map(i=>{const ar=S.art[i.id];return `<tr><td>${ar&&ar.thumb?`<img src="${ar.thumb}" alt="" style="width:40px;height:40px;object-fit:cover;border-radius:4px;vertical-align:middle;margin-right:8px">`:''}${esc(i.codigo)} ${esc(i.descripcion)}</td><td>${grams(i.peso)}</td><td>${money(i.precio)}</td></tr>`}).join('')}</table>
+  <p>Total <b>${money(v.total)}</b> · Inicial ${money(v.inicial)} · Abonos ${money(p.ab)} · <b>Saldo ${money(p.saldo)}</b>${p.vencido>0.005?' · Vencido '+money(p.vencido):''}</p>
+  ${p.cuotas.length?`<table><tr><th>Cuota</th><th>Vence</th><th>Monto</th><th>Pagado</th></tr>${p.cuotas.map(q=>`<tr><td>${q.k}</td><td>${fdate(q.fecha)}</td><td>${money(q.monto)}</td><td>${money(q.pag)}</td></tr>`).join('')}</table>`:''}
+  ${(v.abonos||[]).length?`<table><tr><th>Abono</th><th>Forma de pago</th><th>Monto</th></tr>${v.abonos.map(a=>`<tr><td>${fdate(a.fecha)}</td><td>${esc(a.metodo)} ${esc(a.ref||'')}</td><td>${money(a.monto)}</td></tr>`).join('')}</table>`:''}`}).join('');
+  return `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Estado de cuenta ${esc(c.nombre)}</title><style>body{font-family:Georgia,serif;color:#2A201A;max-width:760px;margin:40px auto;padding:0 20px}h1{letter-spacing:.4em;font-weight:400;color:#5C4233;margin:0}.t{font:11px Arial;letter-spacing:.3em;color:#B58D3D;text-transform:uppercase}h3{font-weight:400;border-bottom:1px solid #C4B19C;padding-bottom:4px;margin-top:28px}table{width:100%;border-collapse:collapse;font:13px Arial;margin:8px 0}th{text-align:left;background:#F3EDE4;font-size:11px;text-transform:uppercase;letter-spacing:.08em}th,td{padding:6px 8px;border-bottom:1px solid #E6DCCF}p{font:13px Arial}.tot{font:16px Arial;margin-top:24px;padding:12px;background:#F3EDE4}</style></head><body>
+  ${S.marca&&S.marca.logo?`<img src="${S.marca.logo}" alt="AURE" style="max-height:80px;max-width:220px;display:block;margin-bottom:6px">`:'<h1>AURE</h1>'}<div class="t">Estado de cuenta · Oro 18K</div>
+  <p><b>Cliente:</b> ${esc(c.nombre)}${c.cedula?' · C.I. '+esc(c.cedula):''}${c.telefono?' · '+esc(c.telefono):''}<br><b>Emitido:</b> ${fdate(today())}</p>${rows}
+  <div class="tot">Saldo total: <b>${money(r.saldo)}</b>${r.venc>0.005?' · Vencido: <b>'+money(r.venc)+'</b>':''}${bs(1)?`<br><span style="font-size:13px">Equivalente a tasa del día (Bs. ${fmt(T().tasa)}): ${bs(r.saldo)}</span>`:''}</div>
+  <p style="color:#76665A;margin-top:30px">AURE · Joyería fina &amp; sentido · Luz que se lleva puesta</p></body></html>`}
+
+/* ============ Descargas ============ */
+async function save(filename,data){
+  try{const type=filename.endsWith('.csv')?'text/csv;charset=utf-8':filename.endsWith('.html')?'text/html;charset=utf-8':filename.endsWith('.pdf')?'application/pdf':'application/json';
+    const file=new File([data],filename,{type});
+    if(filename.endsWith('.json')&&navigator.canShare&&navigator.canShare({files:[file]})){try{await navigator.share({files:[file],title:filename});return true}catch(e){if(e&&e.name==='AbortError')return false}}
+    const url=URL.createObjectURL(file);const a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),4000);return true}
+  catch(e){toast('No se pudo descargar el archivo.');return false}}
+function csv(){
+  const head=['Codigo','Nombre','Categoria','Acabado','Peso_g','Hechura_USD','Costo_USD','PVP_contado_USD','PVP_credito_USD','PVP_contado_Bs','Estado'];
+  const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
+  const rows=Object.values(S.art).sort((a,b)=>(a.codigo||'').localeCompare(b.codigo||'')).map(a=>[a.codigo,a.descripcion,a.tipo,a.acabado,(+a.peso).toFixed(2),(+a.hechura||0).toFixed(2),costoArt(a).toFixed(2),pContado(a).toFixed(2),pCredito(a).toFixed(2),(pContado(a)*(+T().tasa||0)).toFixed(2),a.estado==='vendido'?'Vendido':'Disponible'].map(q).join(';'));
+  save(`AURE-inventario-${today()}.csv`,'﻿'+[head.join(';'),...rows].join('\n'))}
+async function backup(){toast('Preparando respaldo con fotos…');const fotos={};
+  for(const a of Object.values(S.art))if(a.thumb){const f=await getFoto(a.id);if(f)fotos[a.id]=f}
+  const okB=await save(`AURE-respaldo-${today()}.json`,JSON.stringify({app:'AURE control oro',version:2,fecha:new Date().toISOString(),tarifa:S.tarifa,articulos:Object.values(S.art),clientes:Object.values(S.cli),ventas:Object.values(S.ven),fotos}));if(okB!==false){try{localStorage.setItem('aure-ultimo-respaldo',today())}catch(e){}render()}}
+async function restore(file){
+  try{const d=JSON.parse(await file.text());if(d.app!=='AURE control oro')throw 0;
+    toast('Restaurando respaldo…');
+    if(d.tarifa)await putTarifa(d.tarifa);
+    for(const a of d.articulos||[])await put('art',a);
+    for(const [k,f] of Object.entries(d.fotos||{}))await putFoto(k,f);
+    for(const c of d.clientes||[])await put('cli',c);
+    for(const v of d.ventas||[])await put('ven',v);
+    toast('Respaldo restaurado.')}catch(e){toast('El archivo no es un respaldo válido de AURE.')}}
+
+/* ============ Acciones ============ */
+function toast(m){const r=document.getElementById('toastRoot');r.innerHTML=`<div class="toast" role="status">${esc(m)}</div>`;clearTimeout(toast.t);toast.t=setTimeout(()=>r.innerHTML='',3200)}
+function armed(btn,label){if(btn.dataset.armed)return true;const o=btn.textContent;btn.dataset.armed='1';btn.textContent=label||'¿Confirmar?';setTimeout(()=>{if(btn.isConnected){delete btn.dataset.armed;btn.textContent=o}},3500);return false}
+
+document.addEventListener('click',async e=>{
+  const t=e.target.closest('[data-act],[data-tab]');if(!t)return;
+  if(t.dataset.tab){TAB=t.dataset.tab;render();return}
+  const a=t.dataset.act,id=t.dataset.id;
+  if(a==='ov'){if(e.target===t)closeModal();return}
+  if(a==='close'){if(OPEN_FICHA&&document.getElementById('modalRoot').dataset.kind!=='ficha'){const f=OPEN_FICHA;openFicha(f)}else closeModal();return}
+  if(a==='new-art')return formArt();
+  if(a==='edit-art')return formArt(id);
+  if(a==='new-cli')return formCli();
+  if(a==='edit-cli'){const f=OPEN_FICHA;formCli(id);OPEN_FICHA=f;return}
+  if(a==='new-venta')return formVenta();
+  if(a==='new-venta-c'){formVenta(id);OPEN_FICHA=id;return}
+  if(a==='new-cli-v'){VF.pending=true;const keep=VF;formCli(null,true);VF=keep;return}
+  if(a==='ficha')return openFicha(id);
+  if(a==='abono'){const f=OPEN_FICHA;formAbono(id);OPEN_FICHA=f;return}
+  if(a==='inv-f'){UI.invFiltro=t.dataset.f;render();return}
+  if(a==='ven-f'){UI.venFiltro=t.dataset.f;render();return}
+  if(a==='v-mod'){VF.modalidad=t.dataset.m;VF.totalManual=false;document.querySelectorAll('[data-act=v-mod]').forEach(b=>b.setAttribute('aria-pressed',b===t));ventaRecalc();return}
+  if(a==='csv')return csv();
+  if(a==='lock')return lockApp();
+  if(a==='usar-conv'){const i=document.getElementById('tOro');i.value=t.dataset.v;tarifaPreview();toast('Precio 18K cargado. Revisa y pulsa Guardar.');return}
+  if(a==='logo-reset'){if(!armed(t,'¿Volver al original?'))return;await putConfig('marca',{logo:''});toast('Logo original restaurado.');return}
+  if(a==='foto')return verFoto(id);
+  if(a==='foto-quitar'){if(AF){AF.thumb='';AF.full=null;AF.changed=true;fotoPaint()}return}
+  if(a==='backup')return backup();
+  if(a==='del-art'){if(!armed(t,'¿Eliminar definitivamente?'))return;closeModal();await del('art',id);if(S.art[id]===undefined)delFoto(id);toast('Pieza eliminada.');return}
+  if(a==='del-cli'){if(!armed(t,'¿Eliminar ficha?'))return;closeModal();await del('cli',id);toast('Ficha eliminada.');return}
+  if(a==='del-abono'){if(!armed(t,'¿Quitar?'))return;const v=S.ven[t.dataset.v];await put('ven',{...v,abonos:(v.abonos||[]).filter(x=>x.id!==id)});toast('Abono eliminado.');return}
+  if(a==='del-venta'){if(!armed(t,'¿Anular y devolver piezas al inventario?'))return;const v=S.ven[id];
+    for(const i of v.items){const ar=S.art[i.id];if(ar)await put('art',{...ar,estado:'disponible',ventaId:null})}
+    await del('ven',id);toast('Venta anulada. Las piezas volvieron al inventario.');return}
+  if(a==='pdf-share')return compartirPDF(id,{venta:t.dataset.venta||'',abono:t.dataset.abono||''});
+  if(a==='factura')return formFactura();
+  if(a==='factura-quitar'){if(!armed(t,'¿Quitar ajuste?'))return;const sel=facturaSel();for(const x of sel)if(+x.costoReal>0)await put('art',{...x,costoReal:0});closeModal();toast('Ajuste quitado. El costo vuelve a calcularse con el precio del oro.');return}
+  if(a==='post-ficha'){openFicha(id);return}
+  if(a==='copy-edo'){const txt=edoTexto(id);try{await navigator.clipboard.writeText(txt);toast('Estado de cuenta copiado. Pégalo en WhatsApp.')}catch(err){openModal(`${mh('Copiar estado de cuenta')}<div class="mb"><textarea id="edoTxt" style="min-height:260px" readonly>${esc(txt)}</textarea><p class="hint">Selecciona el texto y cópialo.</p></div>`,'');setTimeout(()=>document.getElementById('edoTxt').select(),50)}return}
+  if(a==='dl-edo'){const c=S.cli[id];return save(`Estado-de-cuenta-${(c.nombre||'cliente').replace(/[^\w]+/g,'-')}-${today()}.html`,edoHTML(id))}
+});
+document.getElementById('rateChip').addEventListener('click',()=>{TAB='tarifa';render()});
+document.getElementById('rateChip').addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();TAB='tarifa';render()}});
+
+document.addEventListener('input',e=>{
+  const id=e.target.id;
+  if(id==='invQ'){UI.invQ=e.target.value;const pos=e.target.selectionStart;render();const i=document.getElementById('invQ');i.focus();i.setSelectionRange(pos,pos);return}
+  if(id==='cliQ'){UI.cliQ=e.target.value;const pos=e.target.selectionStart;render();const i=document.getElementById('cliQ');i.focus();i.setSelectionRange(pos,pos);return}
+  if(['aPeso','aCostoReal','aHech'].includes(id))return artPreview();
+  if(id==='fMonto')return facturaPreview();
+  if(['tOro','tMargen','tRecargo','tTasa'].includes(id))return tarifaPreview();
+  if(['cOnza','cPrima'].includes(id))return convPreview();
+  if(id==='abMonto'){const o=document.getElementById('abBs');if(o)o.textContent=bs(e.target.value);return}
+  if(id==='vQ'){const q=e.target.value.toLowerCase();document.querySelectorAll('#vPick .pick').forEach(p=>p.hidden=q&&!p.dataset.q.includes(q));return}
+  if(id==='vTotal'){VF.totalManual=e.target.value!=='';return ventaRecalc()}
+  if(['vIni','vCuotas','vFreq','vFecha'].includes(id))return ventaRecalc();
+});
+document.addEventListener('change',e=>{
+  if(e.target.dataset.act==='v-pick'){e.target.checked?VF.sel.add(e.target.value):VF.sel.delete(e.target.value);VF.totalManual=false;ventaRecalc();return}
+  if(e.target.id==='aTipo'){const c=document.getElementById('aCod'),f=e.target.closest('form');if(c&&f&&!f.dataset.id)c.value=codeArt(e.target.value)}
+  if(e.target.id==='fLote'){facturaPreview();return}
+  if(e.target.id==='invCat'){UI.invCat=e.target.value;render();return}
+  if(e.target.id==='logoFile'&&e.target.files[0]){const file=e.target.files[0];e.target.value='';subirLogo(file)}
+  if(e.target.id==='vFreq')ventaRecalc();
+  if(e.target.id==='restoreFile'&&e.target.files[0])restore(e.target.files[0]);
+  if(e.target.id==='aFoto'&&e.target.files[0]&&AF){const file=e.target.files[0];e.target.value='';
+    if(file.size>25*1024*1024){toast('La imagen pesa más de 25 MB. Usa una más liviana.');return}
+    AF.busy=true;fotoPaint();
+    procesarImagen(file).then(r=>{if(!AF)return;AF.thumb=r.thumb;AF.full=r.full;AF.changed=true;AF.busy=false;fotoPaint()})
+      .catch(()=>{if(AF){AF.busy=false;fotoPaint()}toast('No se pudo leer la imagen. Usa un archivo JPG o PNG.')})}
+});
+
+document.addEventListener('submit',async e=>{
+  if(e.target.closest('form[data-gate]')){e.preventDefault();gateSubmit();return}
+  const f=e.target.closest('form[data-form]');if(!f)return;e.preventDefault();
+  const fd=Object.fromEntries(new FormData(f).entries()),kind=f.dataset.form,id=f.dataset.id;
+  if(kind==='tarifa'){
+    const t={oro:r2(fd.oro),margen:Math.round((+fd.margen||0)*10)/10,recargo:Math.round((+fd.recargo||0)*10)/10,tasa:Math.round((+fd.tasa||0)*10000)/10000,fecha:fd.fecha||today()};
+    if(!(t.oro>0)){toast('Indica el precio del oro por gramo.');return}
+    if(t.margen<0||t.recargo<0){toast('El margen y el recargo no pueden ser negativos.');return}
+    const h=[...(T().historial||[]),{...t}].slice(-60);
+    if(await putTarifa({...t,historial:h}))toast('Precio del oro guardado. Inventario recalculado.');return}
+  if(kind==='factura'){
+    const sel=facturaSel(),monto=r2(fd.monto);
+    if(!sel.length){toast('No hay piezas disponibles en esa selección.');return}
+    if(!(monto>0)){toast('Indica el monto pagado según la factura.');return}
+    const base=sum(sel.map(costoRef));if(!(base>0)){toast('Primero fija el precio del oro.');return}
+    const k=monto/base;let acc=0;
+    const nuevos=sel.map((x,i)=>{let c=i<sel.length-1?r2(costoRef(x)*k):r2(monto-acc);acc=r2(acc+c);return {...x,costoReal:c,ajusteFactura:{monto,fecha:fd.fecha||today(),factor:Math.round(k*1e6)/1e6}}});
+    closeModal();toast(`Aplicando ajuste a ${sel.length} piezas…`);
+    for(const x of nuevos)await put('art',x);
+    toast(`Inversión ajustada a ${money(monto)} en ${sel.length} piezas.`);return}
+  if(kind==='clave'){
+    if(await sha(S.acc.salt+fd.actual)!==S.acc.hash){toast('La clave actual no es correcta.');return}
+    if(fd.nueva.length<4){toast('La nueva clave debe tener al menos 4 caracteres.');return}
+    if(fd.nueva!==fd.rep){toast('Las claves nuevas no coinciden.');return}
+    const salt=uid()+uid(),hash=await sha(salt+fd.nueva),old=ssGet();ssSet(hash);
+    if(await putConfig('acceso',{salt,hash,actualizado:new Date().toISOString()}))toast('Clave cambiada.');else ssSet(old);return}
+  if(kind==='art'){
+    const prev=id?S.art[id]:null;
+    const a={...(prev||{}),id:id||uid(),codigo:prev?prev.codigo:codeArt(fd.tipo),descripcion:fd.descripcion.trim(),tipo:fd.tipo,acabado:(fd.acabado||'').trim(),peso:r2(fd.peso),hechura:r2(fd.hechura),proveedor:fd.proveedor.trim(),lote:(fd.lote||'').trim(),fechaCompra:fd.fechaCompra,costoReal:fd.costoReal?r2(fd.costoReal):0,notas:fd.notas.trim(),estado:prev?prev.estado:'disponible',ventaId:prev?prev.ventaId||null:null,creado:prev?prev.creado:new Date().toISOString()};
+    if(!(a.peso>0)){toast('Indica el peso en gramos.');return}
+    if(AF&&AF.busy){toast('Espera a que termine de procesar la foto.');return}
+    const foto=AF||{changed:false};
+    if(foto.changed){a.thumb=foto.thumb||'';if(foto.thumb&&foto.full){if(!await putFoto(a.id,foto.full))a.thumb=prev?prev.thumb||'':''}else delFoto(a.id)}
+    AF=null;closeModal();if(await put('art',a))toast(prev?'Pieza actualizada.':`Compra registrada como ${a.codigo}.`);return}
+  if(kind==='cli'){
+    const prev=id?S.cli[id]:null;
+    const c={...(prev||{}),id:id||uid(),nombre:fd.nombre.trim(),cedula:fd.cedula.trim(),telefono:fd.telefono.trim(),direccion:fd.direccion.trim(),referencia:fd.referencia.trim(),notas:fd.notas.trim(),creado:prev?prev.creado:new Date().toISOString()};
+    const back=OPEN_FICHA, keep=VF;
+    await put('cli',c);toast(prev?'Ficha actualizada.':'Ficha creada.');
+    if(f.dataset.after&&keep){const sel=keep.sel,mod=keep.modalidad;formVenta(c.id);VF.modalidad=mod;sel.forEach(x=>{VF.sel.add(x);const cb=document.querySelector(`#vPick input[value="${x}"]`);if(cb)cb.checked=true});document.querySelectorAll('[data-act=v-mod]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.m===mod));ventaRecalc();return}
+    if(back)openFicha(back);else closeModal();return}
+  if(kind==='venta'){
+    const items=ventaItems(),credito=VF.modalidad==='credito';
+    if(!fd.clienteId){toast('Selecciona el cliente.');return}
+    if(!items.length){toast('Selecciona al menos una pieza.');return}
+    const total=r2(fd.total),sub=sum(items.map(credito?pCredito:pContado));
+    if(!(total>0)){toast('El total debe ser mayor que cero.');return}
+    const inicial=credito?r2(fd.inicial):total;
+    if(inicial>total){toast('La inicial no puede superar el total.');return}
+    if(credito&&inicial>=total){toast('Con inicial igual al total, regístrala como venta de contado.');return}
+    const v={id:uid(),numero:nextCode('V-','ven','numero'),clienteId:fd.clienteId,fecha:fd.fecha||today(),modalidad:VF.modalidad,
+      items:items.map(a=>({id:a.id,codigo:a.codigo,descripcion:a.descripcion,peso:a.peso,precio:credito?pCredito(a):pContado(a),costo:costoArt(a)})),
+      subtotal:sub,total,inicial,cuotas:credito?Math.max(1,parseInt(fd.cuotas)||1):0,frecuencia:credito?fd.frecuencia:'',
+      tarifa:{oro:T().oro,margen:T().margen,recargo:T().recargo,tasa:T().tasa||0},costoTotal:sum(items.map(costoArt)),abonos:[],notas:(fd.notas||'').trim(),creado:new Date().toISOString()};
+    const cid=v.clienteId;VF=null;
+    if(!await put('ven',v))return;
+    for(const a of items)await put('art',{...a,estado:'vendido',ventaId:v.id});
+    postAccion(cid,{titulo:`Venta ${v.numero} registrada`,eyebrow:'Ficha del cliente',texto:`Plan: ${v.modalidad==='contado'?'contado':v.cuotas+' cuotas '+freqTxt(v.frecuencia)} · Total ${money(v.total)}${v.modalidad==='credito'?' · Inicial '+money(v.inicial):''}. Envíale al cliente su ficha con el plan de cuotas.`,boton:'Enviar ficha con plan de cuotas (PDF)',venta:v.id});return}
+  if(kind==='abono'){
+    const v=S.ven[id],p=plan(v),m=r2(fd.monto);
+    if(!(m>0)){toast('Indica el monto del abono.');return}
+    if(m>p.saldo+0.005){toast(`El abono supera el saldo (${money(p.saldo)}).`);return}
+    const back=OPEN_FICHA;
+    const ab={id:uid(),fecha:fd.fecha||today(),monto:m,metodo:fd.metodo,ref:(fd.ref||'').trim()};
+    await put('ven',{...v,abonos:[...(v.abonos||[]),ab]});
+    const np=plan(S.ven[id]);
+    postAccion(v.clienteId,{titulo:np.saldo<=0.005?'¡Cuenta saldada!':'Abono registrado',eyebrow:esc(v.numero),texto:`Recibido ${money(m)} (${esc(ab.metodo)}). ${np.saldo<=0.005?'La venta quedó pagada por completo.':'Saldo pendiente: '+money(np.saldo)+(np.prox?' · Próxima cuota '+fdate(np.prox.fecha)+' por '+money(np.prox.monto):'')+'.'}`,boton:'Enviar estado de cuenta actualizado (PDF)',venta:v.id,abono:ab.id});return}
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.getElementById('modalRoot').innerHTML)closeModal()});
+
+/* ============ Acceso con clave y logo ============ */
+const SS_KEY='aure-unlock';
+let UNLOCKED=false, FAILS=0, WAIT_UNTIL=0, IDLE_T=null;
+async function sha(t){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(t));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+let MEM_HASH=null;
+function ssGet(){try{return sessionStorage.getItem(SS_KEY)||MEM_HASH}catch(e){return MEM_HASH}}
+function ssSet(v){MEM_HASH=v||null;try{v?sessionStorage.setItem(SS_KEY,v):sessionStorage.removeItem(SS_KEY)}catch(e){}}
+function logoHtml(big){return S.marca&&S.marca.logo?`<img class="${big?'':'logo-img'}" src="${S.marca.logo}" alt="AURE">`:document.getElementById('logoDefault')?document.getElementById('logoDefault').outerHTML.replace('id="logoDefault"',''):''}
+function paintLogo(){const slot=document.getElementById('logoSlot');if(!slot)return;const has=!!(S.marca&&S.marca.logo);
+  const cur=slot.querySelector('img.logo-img');
+  if(has){if(!cur||cur.getAttribute('src')!==S.marca.logo){const d=document.getElementById('logoDefault');if(d)d.hidden=true;if(cur)cur.remove();slot.insertAdjacentHTML('beforeend',`<img class="logo-img" src="${S.marca.logo}" alt="AURE">`)}
+    const wm=document.querySelector('.brand .wm');if(wm)wm.hidden=true}
+  else{if(cur)cur.remove();const d=document.getElementById('logoDefault');if(d)d.hidden=false;const wm=document.querySelector('.brand .wm');if(wm)wm.hidden=false}}
+async function subirLogo(file){
+  try{const img=await loadImg(file);const max=420,k=Math.min(1,max/Math.max(img.naturalWidth,img.naturalHeight));
+    const c=document.createElement('canvas');c.width=Math.round(img.naturalWidth*k);c.height=Math.round(img.naturalHeight*k);
+    c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+    const png=file.type==='image/jpeg'?c.toDataURL('image/jpeg',.9):c.toDataURL('image/png');
+    if(await putConfig('marca',{logo:png}))toast('Logo actualizado.')}catch(e){toast('No se pudo leer la imagen del logo.')}}
+function showGate(mode){
+  const g=document.getElementById('gate');document.querySelector('.wrap').hidden=true;closeModal();
+  g.hidden=false;
+  g.innerHTML=`<form class="gate-card" data-gate="${mode}">
+    <div class="mark">${logoHtml(true)}</div>
+    <div><div class="eyebrow">AURE · Control de oro 18K</div><h2>${mode==='crear'?'Crea tu clave de acceso':'Ingresa tu clave'}</h2></div>
+    ${mode==='crear'?'<p class="hint" style="margin:0">Se pedirá cada vez que abras la app. Mínimo 4 caracteres.</p>':''}
+    <input id="gPin" type="password" autocomplete="${mode==='crear'?'new-password':'current-password'}" aria-label="Clave" required>
+    ${mode==='crear'?'<input id="gPin2" type="password" autocomplete="new-password" aria-label="Repite la clave" placeholder="Repite la clave" required>':''}
+    <p class="gate-err" id="gErr"></p>
+    <button class="btn-gold" type="submit">${mode==='crear'?'Guardar clave y entrar':'Entrar'}</button>
+  </form>`;
+  setTimeout(()=>{const i=document.getElementById('gPin');if(i)i.focus()},40)}
+async function gateSubmit(){
+  const f=document.querySelector('#gate form'),err=document.getElementById('gErr');if(!f)return;
+  const pin=document.getElementById('gPin').value;
+  if(f.dataset.gate==='crear'){
+    const p2=document.getElementById('gPin2').value;
+    if(pin.length<4){err.textContent='La clave debe tener al menos 4 caracteres.';return}
+    if(pin!==p2){err.textContent='Las claves no coinciden.';return}
+    const salt=uid()+uid(),hash=await sha(salt+pin);ssSet(hash);
+    if(!await putConfig('acceso',{salt,hash,creado:new Date().toISOString()})){ssSet(null);err.textContent='No se pudo guardar la clave.';return}
+    unlock();toast('Clave creada.');return}
+  if(Date.now()<WAIT_UNTIL){err.textContent=`Demasiados intentos. Espera ${Math.ceil((WAIT_UNTIL-Date.now())/1000)} s.`;return}
+  const hash=await sha(S.acc.salt+pin);
+  if(hash===S.acc.hash){FAILS=0;ssSet(hash);unlock();return}
+  FAILS++;if(FAILS>=5){WAIT_UNTIL=Date.now()+30000;FAILS=0}
+  err.textContent='Clave incorrecta.';document.getElementById('gPin').value='';document.getElementById('gPin').focus()}
+function unlock(){UNLOCKED=true;const g=document.getElementById('gate');g.hidden=true;g.innerHTML='';document.querySelector('.wrap').hidden=false;render();bumpIdle()}
+function lockApp(){UNLOCKED=false;ssSet(null);showGate('entrar')}
+function bumpIdle(){clearTimeout(IDLE_T);if(UNLOCKED&&S.acc)IDLE_T=setTimeout(lockApp,20*60*1000)}
+['click','keydown','touchstart'].forEach(ev=>document.addEventListener(ev,()=>{if(UNLOCKED)bumpIdle()},{passive:true}));
+function checkGate(){
+  if(!S.loaded)return;
+  if(!S.acc){if(!UNLOCKED)showGate('crear');return}
+  if(UNLOCKED&&ssGet()!==S.acc.hash){lockApp();return}
+  if(!UNLOCKED){if(ssGet()===S.acc.hash)unlock();else if(document.getElementById('gate').hidden)showGate('entrar')}
+}
+
+/* ============ Arranque ============ */
+async function init(){
+  document.querySelector('.wrap').hidden=false;render();document.querySelector('.wrap').hidden=true;
+  document.getElementById('gate').hidden=false;document.getElementById('gate').innerHTML='<div class="gate-card"><div class="mark">'+logoHtml(true)+'</div><p class="hint" style="margin:0">Cargando…</p></div>';
+  MODE='local';loadLocal();
+  if(!Object.keys(S.art).length&&!S.tarifa){S.tarifa=SEED.tarifa;S.art=SEED.art;saveLocal()}
+  try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
+  S.loaded=true;render();checkGate();
+}
+init();
+</script>
+
+</body>
+</html>
