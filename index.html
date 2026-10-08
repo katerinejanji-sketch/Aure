@@ -619,7 +619,7 @@ function formVenta(clienteId){
   const cs=Object.values(S.cli).sort((a,b)=>(a.nombre||'').localeCompare(b.nombre||''));
   if(!S.tarifa){toast('Primero fija los precios por gramo.');TAB='tarifa';render();return}
   if(!disp.length){toast('No hay piezas disponibles. Registra una compra primero.');return}
-  VF={sel:new Set(),modalidad:'credito',totalManual:false,q:''};
+  VF={sel:new Set(),modalidad:'credito',totalManual:false,q:'',aj:'lista'};
   openModal(`<form data-form="venta">${mh('Nueva venta','Ventas')}
   <div class="mb">
     <div class="grid g2">
@@ -631,8 +631,16 @@ function formVenta(clienteId){
     <div><input id="vQ" type="search" placeholder="Buscar pieza disponible" style="margin-bottom:8px">
     <div class="picklist" id="vPick">${disp.map(a=>`<label class="pick" data-q="${esc((a.codigo+' '+a.descripcion+' '+a.tipo).toLowerCase())}"><input type="checkbox" value="${a.id}" data-act="v-pick">${thumbHtml(a,1).replace('data-act="foto"','')}<span class="d"><span class="code">${esc(a.codigo)}</span> ${esc(a.descripcion)}<div class="hint">${grams(a.peso)}</div></span><span class="p" data-pc="${pContado(a)}" data-pr="${pCredito(a)}">${money(pCredito(a))}</span></label>`).join('')}</div></div>
     <div class="sumbar" id="vSum"></div>
-    <div class="grid g4" id="vPlan">
-      <label class="f">Total pactado <input id="vTotal" name="total" type="number" step="0.01" min="0" inputmode="decimal"></label>
+    <div class="conv" style="margin-top:0">
+      <div class="tools" style="justify-content:space-between"><span class="eyebrow" style="color:var(--muted)">Precio para este cliente</span>
+        <div class="seg"><button type="button" data-act="v-aj" data-t="lista" aria-pressed="true">Precio normal</button><button type="button" data-act="v-aj" data-t="desc" aria-pressed="false">Descuento</button><button type="button" data-act="v-aj" data-t="aum" aria-pressed="false">Aumento</button></div></div>
+      <div class="grid g2">
+        <label class="f" id="vAjPctL" hidden>Porcentaje (%) <input id="vAjPct" type="number" step="0.1" min="0" inputmode="decimal" placeholder="Ej. 10"></label>
+        <label class="f">Monto final a cobrar (USD) <small>Puedes escribir el monto directo</small><input id="vTotal" name="total" type="number" step="0.01" min="0" inputmode="decimal"></label>
+        <label class="f" id="vAjMotL" hidden style="grid-column:1/-1">Motivo (solo lo ves tú) <input id="vAjMot" name="ajusteMotivo" maxlength="120" placeholder="Ej. Cliente frecuente, cliente con potencial"></label>
+      </div>
+    </div>
+    <div class="grid g3" id="vPlan">
       <label class="f">Inicial <input id="vIni" name="inicial" type="number" step="0.01" min="0" inputmode="decimal" value="0"></label>
       <label class="f">N.º de cuotas <input id="vCuotas" name="cuotas" type="number" min="1" max="60" step="1" value="4"></label>
       <label class="f">Frecuencia <select id="vFreq" name="frecuencia"><option value="semanal">Semanal</option><option value="quincenal" selected>Quincenal</option><option value="mensual">Mensual</option></select></label>
@@ -648,9 +656,14 @@ function ventaRecalc(){
   if(!VF)return; const items=ventaItems(), credito=VF.modalidad==='credito';
   document.querySelectorAll('#vPick .p').forEach(p=>p.textContent=money(+p.dataset[credito?'pr':'pc']));
   const sub=sum(items.map(credito?pCredito:pContado)), g=sum(items.map(a=>a.peso)), cost=sum(items.map(costoArt));
-  const tI=document.getElementById('vTotal'); if(!VF.totalManual)tI.value=sub?sub.toFixed(2):'';
-  const total=+tI.value||0;
-  document.getElementById('vSum').innerHTML=`<span>${items.length} ${items.length===1?'pieza':'piezas'}</span><span>${grams(g)}</span><span>Precio ${credito?'crédito':'contado'}: <b>${money(sub)}</b></span>${total&&total!==sub?`<span>Ajuste: <b>${money(total-sub)}</b></span>`:''}<span>Utilidad: <b>${money(total-cost)}</b></span>`;
+  const tI=document.getElementById('vTotal'),pI=document.getElementById('vAjPct');
+  if(!VF.totalManual){const pc=+pI.value||0;const f=VF.aj==='desc'?1-pc/100:VF.aj==='aum'?1+pc/100:1;tI.value=sub?r2(sub*f).toFixed(2):''}
+  const total=+tI.value||0, dif=r2(total-sub);
+  if(VF.totalManual&&sub){const pc=Math.abs(total/sub-1)*100;if(Math.abs(dif)<0.005){VF.aj='lista'}else{VF.aj=dif<0?'desc':'aum';pI.value=(Math.round(pc*10)/10).toString()}}
+  document.querySelectorAll('[data-act=v-aj]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.t===VF.aj));
+  document.getElementById('vAjPctL').hidden=VF.aj==='lista';document.getElementById('vAjMotL').hidden=VF.aj==='lista'&&Math.abs(dif)<0.005;
+  const ajTxt=Math.abs(dif)<0.005||!sub?'':`<span style="color:${dif<0?'var(--warn)':'var(--ok)'}">${dif<0?'Descuento':'Aumento'} ${pct(Math.abs(dif)/sub*100)}: <b>${dif<0?'−':'+'}${money(Math.abs(dif))}</b></span>`;
+  document.getElementById('vSum').innerHTML=`<span>${items.length} ${items.length===1?'pieza':'piezas'}</span><span>${grams(g)}</span><span>Precio ${credito?'crédito':'contado'}: <b>${money(sub)}</b></span>${ajTxt}<span>A cobrar: <b>${money(total)}</b></span><span>Utilidad: <b>${money(total-cost)}</b></span>`;
   ['vCuotas','vFreq','vIni'].forEach(i=>document.getElementById(i).closest('label').hidden=!credito);
   const box=document.getElementById('vCuotasPrev');
   if(!credito||!total){box.innerHTML='';return}
@@ -683,12 +696,12 @@ function openFicha(cid,refresh){
     <div class="vh"><div><span class="code">${esc(v.numero)}</span> · <span class="num">${fdate(v.fecha)}</span> · ${v.modalidad==='contado'?'Contado':`${v.cuotas} cuotas ${freqTxt(v.frecuencia)}`}</div><div>${chipEstado(p.estado)}</div></div>
     <div class="vb">
       <div class="scroll"><table class="mini"><thead><tr><th>Pieza</th><th class="r">Peso</th><th class="r">Precio</th></tr></thead><tbody>${v.items.map(i=>`<tr><td><div class="pz">${thumbHtml(S.art[i.id]||{tipo:''},1)}<div><span class="code">${esc(i.codigo)}</span> ${esc(i.descripcion)}</div></div></td><td class="r">${grams(i.peso)}</td><td class="r">${money(i.precio)}</td></tr>`).join('')}
-      ${Math.abs(v.total-v.subtotal)>0.005?`<tr><td colspan="2">Ajuste pactado</td><td class="r">${money(v.total-v.subtotal)}</td></tr>`:''}</tbody></table></div>
+      ${Math.abs(v.total-v.subtotal)>0.005?`<tr><td colspan="2">${v.total<v.subtotal?'Descuento':'Aumento'} ${pct(Math.abs(v.total/v.subtotal-1)*100)}${v.ajusteMotivo?`<div class="hint">${esc(v.ajusteMotivo)}</div>`:''}</td><td class="r">${v.total<v.subtotal?'−':'+'}${money(Math.abs(v.total-v.subtotal))}</td></tr>`:''}</tbody></table></div>
       <div class="sumbar"><span>Total <b>${money(v.total)}</b></span><span>Inicial <b>${money(v.inicial)}</b></span><span>Abonos <b>${money(p.ab)}</b></span><span>Saldo <b>${money(p.saldo)}</b></span>${p.vencido>0?`<span style="color:var(--bad)">Vencido <b>${money(p.vencido)}</b></span>`:''}</div>
       ${p.cuotas.length?`<div class="scroll"><table class="mini"><thead><tr><th>Cuota</th><th>Vence</th><th class="r">Monto</th><th class="r">Pagado</th><th>Estado</th></tr></thead><tbody>${p.cuotas.map(q=>`<tr><td>${q.k}/${p.cuotas.length}</td><td class="num">${fdate(q.fecha)}</td><td class="r">${money(q.monto)}</td><td class="r">${money(q.pag)}</td><td>${q.st==='pendiente'&&q.pag>0?'<span class="chip c-warn">Parcial</span>':chipEstado(q.st)||'<span class="chip c-n">Pendiente</span>'}</td></tr>`).join('')}</tbody></table></div>`:''}
       ${(v.abonos||[]).length?`<div><div class="eyebrow" style="margin-bottom:4px">Abonos recibidos</div><div class="scroll"><table class="mini"><tbody>${v.abonos.slice().sort((a,b)=>a.fecha.localeCompare(b.fecha)).map(a=>`<tr><td class="num">${fdate(a.fecha)}</td><td>${esc(a.metodo)}${a.ref?' · '+esc(a.ref):''}</td><td class="r">${money(a.monto)}</td><td style="width:1%"><button class="btn-sm btn-ghost btn-danger" data-act="del-abono" data-v="${v.id}" data-id="${a.id}">Quitar</button></td></tr>`).join('')}</tbody></table></div></div>`:''}
       ${v.notas?`<p class="hint" style="margin:0">${esc(v.notas)}</p>`:''}
-      <div class="tools">${p.saldo>0.005?`<button class="btn-sm btn-gold" data-act="abono" data-id="${v.id}">Registrar abono</button>`:''}<span style="flex:1"></span><button class="btn-sm btn-ghost btn-danger" data-act="del-venta" data-id="${v.id}">Anular venta</button></div>
+      <div class="tools">${p.saldo>0.005?`<button class="btn-sm btn-gold" data-act="abono" data-id="${v.id}">Registrar abono</button>`:''}<button class="btn-sm" data-act="monto" data-id="${v.id}">Cambiar monto</button><span style="flex:1"></span><button class="btn-sm btn-ghost btn-danger" data-act="del-venta" data-id="${v.id}">Anular venta</button></div>
     </div></div>`}).join('');
   openModal(`${mh(esc(c.nombre),'Ficha de cliente')}
   <div class="mb">
@@ -711,6 +724,23 @@ function openFicha(cid,refresh){
   OPEN_FICHA=cid;
   if(refresh&&scrollY){const o=document.querySelector('#modalRoot .ov');if(o)o.scrollTop=scrollY}
 }
+
+/* ============ Cambiar el monto de una venta ============ */
+function formMonto(vid){const v=S.ven[vid];if(!v)return;const p=plan(v);
+  openModal(`<form data-form="monto" data-id="${vid}">${mh('Cambiar monto',esc(v.numero))}
+  <div class="mb">
+    <div class="sumbar"><span>Precio normal <b>${money(v.subtotal)}</b></span><span>Monto actual <b>${money(v.total)}</b></span><span>Ya pagado <b>${money(p.pagado)}</b></span></div>
+    <div class="grid g2">
+      <label class="f">Nuevo monto final (USD) <input id="nvTotal" name="total" type="number" step="0.01" min="0.01" inputmode="decimal" value="${v.total.toFixed(2)}" required></label>
+      <label class="f">Motivo (solo lo ves tú) <input id="nvMot" name="motivo" maxlength="120" value="${esc(v.ajusteMotivo)}"></label>
+    </div>
+    <div id="nvPrev" class="hint"></div>
+  </div>
+  <div class="mf"><button type="button" data-act="close">Cancelar</button><button class="btn-gold" type="submit">Guardar monto</button></div></form>`);
+  nuevoMontoPrev()}
+function nuevoMontoPrev(){const f=document.querySelector('form[data-form=monto]');if(!f)return;const v=S.ven[f.dataset.id];const t=+document.getElementById('nvTotal').value||0;
+  const d=t-v.subtotal;const p=plan({...v,total:t});
+  document.getElementById('nvPrev').innerHTML=!t?'':`${Math.abs(d)<0.005?'Precio normal.':(d<0?'Descuento':'Aumento')+' de '+pct(Math.abs(d)/v.subtotal*100)+' ('+money(Math.abs(d))+') sobre el precio normal.'} Nuevo saldo: <b>${money(p.saldo)}</b>${p.cuotas.length?' · cuotas de '+money(p.cuotas[p.cuotas.length-1].monto):''}.`}
 
 /* ============ Ajuste de inversión a factura ============ */
 function facturaSel(){const el=document.getElementById('fLote');const l=el?el.value:'';return Object.values(S.art).filter(a=>a.estado!=='vendido'&&(!l||a.lote===l)).sort((a,b)=>(a.codigo||'').localeCompare(b.codigo||''))}
@@ -788,7 +818,7 @@ function pdfEstado(cid,opt){
     doc.setFont('helvetica','bold');doc.setFontSize(11);doc.setTextColor(...INK);doc.text(`${v.numero}  ·  ${fdate(v.fecha)}`,M,y);
     doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(...MUT);doc.text(v.modalidad==='contado'?'Contado':`${v.cuotas} cuotas ${freqTxt(v.frecuencia)}`,W-M,y,{align:'right'});y+=10;
     const body=v.items.map(i=>[i.codigo,i.descripcion,grams(i.peso),pm(i.precio)]);
-    if(Math.abs(v.total-v.subtotal)>0.005)body.push(['','Ajuste pactado','',pm(v.total-v.subtotal)]);
+    if(Math.abs(v.total-v.subtotal)>0.005)body.push(['',v.total<v.subtotal?'Descuento especial':'Precio especial','',(v.total<v.subtotal?'- ':'+ ')+pm(Math.abs(v.total-v.subtotal))]);
     tbl(['Código','Pieza','Peso','Precio'],body,{0:{cellWidth:78,textColor:GOLD,fontStyle:'bold'},2:{halign:'right',cellWidth:60},3:{halign:'right',cellWidth:80}});
     need(30);doc.setFontSize(9.5);doc.setTextColor(...INK);
     doc.text(`Total ${pm(v.total)}   ·   Inicial ${pm(v.inicial)}   ·   Abonos ${pm(p.ab)}`,M,y);doc.setFont('helvetica','bold');doc.text('Saldo '+pm(p.saldo),W-M,y,{align:'right'});doc.setFont('helvetica','normal');y+=12;
@@ -896,6 +926,8 @@ document.addEventListener('click',async e=>{
   if(a==='abono'){const f=OPEN_FICHA;formAbono(id);OPEN_FICHA=f;return}
   if(a==='inv-f'){UI.invFiltro=t.dataset.f;render();return}
   if(a==='ven-f'){UI.venFiltro=t.dataset.f;render();return}
+  if(a==='v-aj'){VF.aj=t.dataset.t;VF.totalManual=false;if(VF.aj==='lista')document.getElementById('vAjPct').value='';else setTimeout(()=>document.getElementById('vAjPct').focus(),20);ventaRecalc();return}
+  if(a==='monto'){const f=OPEN_FICHA;formMonto(id);OPEN_FICHA=f;return}
   if(a==='v-mod'){VF.modalidad=t.dataset.m;VF.totalManual=false;document.querySelectorAll('[data-act=v-mod]').forEach(b=>b.setAttribute('aria-pressed',b===t));ventaRecalc();return}
   if(a==='csv')return csv();
   if(a==='lock')return lockApp();
@@ -931,6 +963,8 @@ document.addEventListener('input',e=>{
   if(id==='abMonto'){const o=document.getElementById('abBs');if(o)o.textContent=bs(e.target.value);return}
   if(id==='vQ'){const q=e.target.value.toLowerCase();document.querySelectorAll('#vPick .pick').forEach(p=>p.hidden=q&&!p.dataset.q.includes(q));return}
   if(id==='vTotal'){VF.totalManual=e.target.value!=='';return ventaRecalc()}
+  if(id==='vAjPct'){VF.totalManual=false;return ventaRecalc()}
+  if(id==='nvTotal')return nuevoMontoPrev();
   if(['vIni','vCuotas','vFreq','vFecha'].includes(id))return ventaRecalc();
 });
 document.addEventListener('change',e=>{
@@ -958,6 +992,14 @@ document.addEventListener('submit',async e=>{
     if(t.mContado<0||t.mCredito<0){toast('Los porcentajes no pueden ser negativos.');return}
     const h=[...(T().historial||[]),{...t}].slice(-60);
     if(await putTarifa({...t,historial:h}))toast('Precios guardados. Inventario recalculado.');return}
+  if(kind==='monto'){
+    const v=S.ven[id],p=plan(v),t=r2(fd.total);
+    if(!(t>0)){toast('Indica el nuevo monto.');return}
+    if(t<p.pagado-0.005){toast(`El monto no puede ser menor a lo ya pagado (${money(p.pagado)}).`);return}
+    if(v.modalidad==='credito'&&t<=+v.inicial){toast('El monto debe ser mayor que la inicial.');return}
+    const back=OPEN_FICHA;
+    await put('ven',{...v,total:t,ajusteMotivo:Math.abs(t-v.subtotal)>0.005?(fd.motivo||'').trim():''});
+    toast(`Monto actualizado a ${money(t)}.`);if(back)openFicha(back);else closeModal();return}
   if(kind==='factura'){
     const sel=facturaSel(),monto=r2(fd.monto);
     if(!sel.length){toast('No hay piezas disponibles en esa selección.');return}
@@ -1001,7 +1043,7 @@ document.addEventListener('submit',async e=>{
     const v={id:uid(),numero:nextCode('V-','ven','numero'),clienteId:fd.clienteId,fecha:fd.fecha||today(),modalidad:VF.modalidad,
       items:items.map(a=>({id:a.id,codigo:a.codigo,descripcion:a.descripcion,peso:a.peso,precio:credito?pCredito(a):pContado(a),costo:costoArt(a)})),
       subtotal:sub,total,inicial,cuotas:credito?Math.max(1,parseInt(fd.cuotas)||1):0,frecuencia:credito?fd.frecuencia:'',
-      tarifa:{costoG:PG().c,mContado:PG().mc,mCredito:PG().mr,tasa:T().tasa||0},costoTotal:sum(items.map(costoArt)),abonos:[],notas:(fd.notas||'').trim(),creado:new Date().toISOString()};
+      tarifa:{costoG:PG().c,mContado:PG().mc,mCredito:PG().mr,tasa:T().tasa||0},costoTotal:sum(items.map(costoArt)),ajusteMotivo:Math.abs(total-sub)>0.005?(fd.ajusteMotivo||'').trim():'',abonos:[],notas:(fd.notas||'').trim(),creado:new Date().toISOString()};
     const cid=v.clienteId;VF=null;
     if(!await put('ven',v))return;
     for(const a of items)await put('art',{...a,estado:'vendido',ventaId:v.id});
